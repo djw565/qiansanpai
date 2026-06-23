@@ -6,7 +6,7 @@
   'use strict';
 
   // ====== 在这里改密码！======
-  var PASSWORD = 'qiansanpai2025';
+  var PASSWORD = 'qiansanpai2026';
   // =========================
 
   // 密码的简单哈希（防止明文直接暴露，但 F12 可破解——防君子不防小人）
