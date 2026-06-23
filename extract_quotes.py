@@ -75,6 +75,8 @@ def is_good_quote(text: str) -> bool:
 
     # 以弱词开头 → 排除
     weak_starts = [
+        r'^[一二三四五六七八九]是',  # 一是/二是/三是（列举）
+        r'^第[一二三四五六七八九\d]',  # 第一/第二
         r'^所以', r'^然后', r'^但是', r'^因为', r'^而且', r'^或者',
         r'^就是', r'^就是说', r'^也就是说', r'^换句话说',
         r'^你看', r'^你想', r'^你想想', r'^你们想',
@@ -111,16 +113,14 @@ def is_good_quote(text: str) -> bool:
     if text.count('，') > 4:
         return False
 
-    # emoji 前缀 → 排除
-    if any(ord(c) > 0x2600 for c in text[:3]):
+    # emoji / 特殊符号开头 → 排除
+    if any(0x1F300 <= ord(c) <= 0x1FAFF for c in text[:2]):
         return False
 
-    # 重复/口吃式表达 → 排除
-    stutter_patterns = [
-        r'(.{5,15})\1',   # 连续重复5-15字的片段
-    ]
-    for pat in stutter_patterns:
-        if re.search(pat, text):
+    # 重复口吃式表达 → 排除（同一句话里同一个5字+片段出现两次）
+    words = text.replace('，', ' ').replace('。', ' ').split()
+    for i, w in enumerate(words):
+        if len(w) >= 4 and w in words[i+1:]:
             return False
 
     # ===== 第2关：质量评分 =====
