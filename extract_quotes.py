@@ -49,6 +49,19 @@ def is_good_quote(text: str) -> bool:
         if w in text:
             return False
 
+    # 叙事细节特征：专名 + 具体动作 → 是故事不是金句
+    # （但保留 X说的：/X讲的：引用格式）
+    story_names = ['坎道列斯', '巨吉斯', '阿尔·卡彭', '来俊臣',
+                   '荀彧', '颍川', '杨修', '朱某', '童锦程',
+                   '赵长鹏', '孙哥']
+    for name in story_names:
+        if name in text:
+            # 如果是 "X说的" 引用模式，放行
+            if re.search(name + r'.{0,2}(?:说的|讲过|那句话)', text):
+                continue
+            # 否则是叙事，排除
+            return False
+
     # 包含案例特征的排除：日期、金额、具体人名
     case_patterns = [
         r'\d{4}年\d{1,2}月',            # 2024年3月
