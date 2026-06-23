@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能问答 — 前三排 · 知识库 Agent</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/agent.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-title"><span class="accent">前三排</span> · 知识库 Agent</div>
+  <div class="site-subtitle">基于 83 篇文章 · 76 万字的辩证唯物主义知识库</div>
+</header>
+
+<main class="agent-container">
+  <div id="chat-area">
+    <div class="agent-intro">
+      <h2>👋 你好！我是前三排知识库助手</h2>
+      <p>我可以帮你：</p>
+      <div class="capability-list">
+        <span class="cap-tag">🔍 搜索相关文章</span>
+        <span class="cap-tag">📖 引用原文段落</span>
+        <span class="cap-tag">🧠 综合分析问题</span>
+        <span class="cap-tag">🔗 提供原文链接</span>
+      </div>
+      <p class="hint">试试问我：<br>
+      <em>"怎么用辩证唯物主义分析职场？"</em><br>
+      <em>"什么是二阶思维？"</em><br>
+      <em>"如何看一段关系中的权力结构？"</em></p>
+    </div>
+  </div>
+
+  <div class="agent-input-bar">
+    <input type="text" id="agent-input" placeholder="输入你的问题..." autocomplete="off">
+    <button id="agent-send">发送</button>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p><a href="index.html">← 返回文章目录</a> | <a href="SKILL.md">📋 Agent 能力定义</a></p>
+</footer>
+
+<script src="js/agent.js"></script>
+</body>
+</html>

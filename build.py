@@ -473,6 +473,7 @@ def main():
                 'filename': txt_file.name,
                 'tags': classify_tags(parsed['title']),
                 'char_count': len(text),
+                'fulltext': text,  # 保存全文供 Agent 搜索
             })
 
             success += 1
@@ -530,6 +531,26 @@ def main():
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(json_data, f, ensure_ascii=False, indent=2)
     print(f"[DATA] 数据文件已生成: {json_path}")
+
+    # 生成全文索引 fulltext.json（供 Agent 搜索用）
+    fulltext_data = []
+    for a in articles:
+        if a.get('char_count', 0) > 0:  # 只包含有文字内容的 TXT 文章
+            fulltext_data.append({
+                'date': a['date'],
+                'date_display': a['date_display'],
+                'title': a['title'],
+                'type': a['type'],
+                'type_cn': a['type_cn'],
+                'slug': a['slug'],
+                'tags': a['tags'],
+                'fulltext': a.get('fulltext', ''),  # 全文
+            })
+
+    fulltext_path = BASE_DIR / "fulltext.json"
+    with open(fulltext_path, 'w', encoding='utf-8') as f:
+        json.dump(fulltext_data, f, ensure_ascii=False, indent=2)
+    print(f"[DATA] 全文索引已生成: {fulltext_path}")
 
     # 统计报告
     print(f"\n{'=' * 60}")
