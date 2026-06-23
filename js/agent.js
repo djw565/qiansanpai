@@ -5,9 +5,9 @@
 (function () {
   'use strict';
 
-  // ====== 配置：部署 Worker 后把下面的地址改成你的 ======
-  var API_ENDPOINT = '';  // 例如 'https://zixiu-agent.你的用户名.workers.dev'
-  // ======================================================
+  // ====== 配置：Cloudflare Worker 地址 ======
+  var API_ENDPOINT = 'https://rapid-dawn-e859.snfg624dcg.workers.dev';
+  // =========================================
 
   var fulltextDB = [];
   var concepts = {};
