@@ -309,13 +309,21 @@ def build_index_page(articles: list):
             excerpt = a.get('excerpt', '')
             excerpt_html = f'<div class="article-excerpt">{excerpt}</div>' if excerpt else ''
 
-            card = f'''      <a href="articles/{a['slug']}.html" class="article-card">
+            # PDF 和 TXT 的链接路径不同
+            if a['type'] == 'pdf':
+                href = a['slug']  # pdf/filename.pdf
+                link_icon = ' 📄'
+            else:
+                href = f"articles/{a['slug']}.html"
+                link_icon = ''
+
+            card = f'''      <a href="{href}" class="article-card"{' target="_blank"' if a['type'] == 'pdf' else ''}>
         <div class="article-meta">
           <span class="article-date">{a['date_display']}</span>
           <span class="article-type {a['type']}">{a['type_cn']}</span>
           {tags_html}
         </div>
-        <div class="article-title">{html.escape(a['title'])}</div>
+        <div class="article-title">{html.escape(a['title'])}{link_icon}</div>
         {excerpt_html}
       </a>'''
             cards.append(card)
@@ -338,6 +346,7 @@ def build_index_page(articles: list):
     <a href="#" class="filter-tag" data-filter="思维方法">思维方法</a>
     <a href="#" class="filter-tag" data-filter="心理">心理</a>
     <a href="#" class="filter-tag" data-filter="社会">社会</a>
+    <a href="#" class="filter-tag" data-filter="PDF案例">PDF案例</a>
   </div>
 </nav>
 
@@ -357,7 +366,70 @@ def build_index_page(articles: list):
         f.write(content)
 
 
-# ============ 主构建流程 ============
+def parse_pdf_filename(filename: str) -> dict:
+    """
+    解析 PDF 文件名，提取日期、标题。
+    支持格式:
+      - 2025.10.12案例名称：标题.pdf
+      - 2025.10.31 主题分享：标题.pdf
+      - 20250628标题.pdf
+      - 冻卵与代孕.pdf (无日期)
+    """
+    name = filename.replace('.pdf', '').strip()
+
+    result = {
+        'date': '',
+        'date_display': '',
+        'type': 'pdf',
+        'type_cn': 'PDF案例',
+        'title': name,
+        'timestamp': 0,
+    }
+
+    # 尝试匹配日期前缀
+    date_match = re.match(r'(\d{4})\.(\d{2})\.(\d{1,2})', name)
+    if date_match:
+        y, m, d = date_match.group(1), date_match.group(2), date_match.group(3)
+        result['date'] = f"{y}-{m}-{d.zfill(2)}"
+        result['date_display'] = f"{y}年{m}月{int(d)}日"
+        remaining = name[date_match.end():].strip()
+    else:
+        date_match = re.match(r'(\d{4})(\d{2})(\d{2})', name)
+        if date_match:
+            y, m, d = date_match.group(1), date_match.group(2), date_match.group(3)
+            result['date'] = f"{y}-{m}-{d}"
+            result['date_display'] = f"{y}年{m}月{d}日"
+            remaining = name[date_match.end():].strip()
+        else:
+            remaining = name
+
+    # 提取类型标签
+    for prefix in ['案例名称', '案例名称_', '案例名称：', '案例名称_《']:
+        if remaining.startswith(prefix):
+            remaining = remaining[len(prefix):]
+            break
+
+    # 清理标记
+    remaining = re.sub(r'[：:]\s*', '：', remaining)
+    remaining = remaining.strip('_ 《》「」')
+    # 移除尾部编号
+    remaining = re.sub(r'\s*[\(（]\d+[\)）]\s*$', '', remaining)
+    # 移除尾部随机字符串
+    remaining = re.sub(r'-[a-f0-9]{6,}$', '', remaining)
+    remaining = remaining.rstrip('：:。，,、 _-')
+
+    if remaining:
+        result['title'] = remaining
+
+    # 生成 timestamp
+    if result['date']:
+        try:
+            dt = datetime.strptime(result['date'], '%Y-%m-%d')
+            result['timestamp'] = dt.timestamp()
+        except:
+            pass
+
+    return result
 
 def main():
     print("=" * 60)
@@ -403,6 +475,29 @@ def main():
         except Exception as e:
             errors.append((txt_file.name, str(e)))
             print(f"  [ERR] {txt_file.name}: {e}")
+
+    # ===== 处理 PDF 文件 =====
+    pdf_files = sorted(PDF_DIR.glob("*.pdf")) if PDF_DIR.exists() else []
+    print(f"\n[OK] 找到 {len(pdf_files)} 个 PDF 文件")
+
+    for pdf_file in pdf_files:
+        try:
+            parsed = parse_pdf_filename(pdf_file.name)
+            pdf_tags = classify_tags(parsed['title'])
+            if 'PDF案例' not in pdf_tags:
+                pdf_tags.append('PDF案例')
+            articles.append({
+                **parsed,
+                'slug': 'pdf/' + pdf_file.name,  # 直接链接到PDF
+                'excerpt': 'PDF 案例文档 — 点击下载或在线查看',
+                'filename': pdf_file.name,
+                'tags': pdf_tags,
+                'char_count': 0,
+            })
+            print(f"  [PDF] {parsed['date']} | {parsed['title'][:40]}")
+        except Exception as e:
+            errors.append((pdf_file.name, str(e)))
+            print(f"  [ERR] {pdf_file.name}: {e}")
 
     # 按日期排序（新 → 旧）
     articles.sort(key=lambda a: a['timestamp'], reverse=True)
