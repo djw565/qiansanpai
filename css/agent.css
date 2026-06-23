@@ -245,6 +245,19 @@
   cursor: not-allowed;
 }
 
+/* AI 生成标记 */
+.ai-answer {
+  position: relative;
+}
+
+.ai-answer::after {
+  content: 'AI 生成';
+  display: inline-block;
+  font-size: 0.65rem;
+  color: #bbb;
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 600px) {
   .agent-container { padding: 1rem 0.5rem; }
   .msg-agent .msg-bubble { max-width: 100%; }

@@ -5,13 +5,17 @@
 (function () {
   'use strict';
 
+  // ====== 配置：部署 Worker 后把下面的地址改成你的 ======
+  var API_ENDPOINT = '';  // 例如 'https://zixiu-agent.你的用户名.workers.dev'
+  // ======================================================
+
   var fulltextDB = [];
   var concepts = {};
   var chatArea = null;
   var inputEl = null;
   var sendBtn = null;
   var isLoading = false;
-  var questionCount = 0; // 模拟子休的轮次追问
+  var questionCount = 0;
 
   function init() {
     chatArea = document.getElementById('chat-area');
@@ -88,12 +92,63 @@
     setTimeout(function () {
       var results = searchKnowledgeBase(query);
       var matchedConcepts = matchConcepts(query);
-      removeTyping();
-      showZixiuAnswer(query, results, matchedConcepts);
-      isLoading = false;
-      sendBtn.disabled = false;
-      sendBtn.textContent = '发送';
-    }, 500);
+      var context = buildContext(results, matchedConcepts);
+
+      // 如果配置了 API，用 AI 回答
+      if (API_ENDPOINT) {
+        fetchAIAnswer(query, context, results, matchedConcepts);
+      } else {
+        removeTyping();
+        showZixiuAnswer(query, results, matchedConcepts);
+        isLoading = false;
+        sendBtn.disabled = false;
+        sendBtn.textContent = '发送';
+      }
+    }, 300);
+  }
+
+  function buildContext(results, concepts) {
+    var parts = [];
+    if (concepts.length) {
+      parts.push('【匹配概念】');
+      concepts.forEach(function (c) { parts.push(c.name + '：' + c.desc); });
+    }
+    if (results.length) {
+      parts.push('【相关案例摘要】');
+      results.slice(0, 3).forEach(function (r) {
+        var text = r.doc.fulltext || r.doc.excerpt || '';
+        parts.push('《' + r.doc.title + '》' + (text ? '：' + text.slice(0, 300) : ''));
+      });
+    }
+    return parts.join('\n\n');
+  }
+
+  function fetchAIAnswer(query, context, results, concepts) {
+    fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: query, context: context }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        removeTyping();
+        if (data.answer) {
+          addAgentMsg('<div class="ai-answer">' + data.answer.replace(/\n/g, '<br>') + '</div>');
+        } else {
+          showZixiuAnswer(query, results, concepts);
+        }
+        isLoading = false;
+        sendBtn.disabled = false;
+        sendBtn.textContent = '发送';
+        chatArea.scrollTop = chatArea.scrollHeight;
+      })
+      .catch(function () {
+        removeTyping();
+        showZixiuAnswer(query, results, concepts); // 降级
+        isLoading = false;
+        sendBtn.disabled = false;
+        sendBtn.textContent = '发送';
+      });
   }
 
   // ============ 概念匹配 ============
