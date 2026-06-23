@@ -367,8 +367,8 @@ def main():
     # 确保目录存在
     ARTICLES_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 收集所有 TXT 文件
-    txt_files = sorted(RAW_TXT_DIR.glob("*.txt"))
+    # 收集所有 TXT 文件（跳过模板文件）
+    txt_files = sorted([f for f in RAW_TXT_DIR.glob("*.txt") if not f.name.startswith("模板")])
     print(f"\n[OK] 找到 {len(txt_files)} 个 TXT 文件")
 
     articles = []
