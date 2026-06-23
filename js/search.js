@@ -1,59 +1,46 @@
 /**
  * 前三排 · 学习小组 — 客户端搜索
- * 基于 articles.json 实现实时中文搜索
+ * 基于 articles.json + fulltext.json 实现实时全文搜索
  */
-
 (function () {
   'use strict';
 
   var articles = [];
+  var fulltextMap = {}; // slug -> full text
+  var fulltextLoaded = false;
   var searchInput = null;
   var mainContent = null;
   var resultCount = null;
   var allYearSections = null;
   var debounceTimer = null;
 
-  // ============ 初始化 ============
-
   function init() {
     searchInput = document.getElementById('search-input');
     mainContent = document.querySelector('.main-content');
     if (!searchInput || !mainContent) return;
 
-    // 保存所有年份区块的引用
     allYearSections = mainContent.querySelectorAll('.year-section');
-
-    // 创建结果计数元素
     resultCount = document.createElement('div');
     resultCount.className = 'search-result-count';
     resultCount.style.display = 'none';
     mainContent.insertBefore(resultCount, mainContent.firstChild);
 
-    // 加载文章数据
+    // 快速加载元数据
     fetch('articles.json')
-      .then(function (resp) { return resp.json(); })
-      .then(function (data) {
-        articles = data;
-      })
-      .catch(function () {
-        console.warn('articles.json 加载失败，搜索功能不可用');
-      });
+      .then(function (r) { return r.json(); })
+      .then(function (d) { articles = d; })
+      .catch(function () {});
 
-    // 绑定搜索框事件
     searchInput.addEventListener('input', onSearchInput);
     searchInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        searchInput.value = '';
-        clearSearch();
-      }
+      if (e.key === 'Escape') { searchInput.value = ''; clearSearch(); }
     });
 
-    // 绑定标签点击事件
+    // 标签点击
     var filterTags = document.querySelectorAll('.filter-tag');
     filterTags.forEach(function (tag) {
       tag.addEventListener('click', function (e) {
         var filter = this.getAttribute('data-filter');
-        // 只有带 data-filter 的标签才拦截（AI问答等链接正常跳转）
         if (!filter) return;
         e.preventDefault();
         onTagClick(filter, this);
@@ -61,273 +48,187 @@
     });
   }
 
-  // ============ 标签筛选 ============
-
+  // ============ 搜索 ============
   var currentTag = null;
 
-  function onTagClick(filter, tagEl) {
-    // 切换：点同一个标签取消筛选
-    if (currentTag === filter) {
-      currentTag = null;
-      clearSearch();
-      updateTagActive(null);
-      return;
-    }
-
-    currentTag = filter;
-    updateTagActive(tagEl);
-
-    if (!articles.length) return;
-
-    var results;
-    if (filter === 'all') {
-      currentTag = null;
-      clearSearch();
-      updateTagActive(null);
-      return;
-    } else {
-      results = articles.filter(function (a) {
-        return a.tags && a.tags.indexOf(filter) !== -1;
-      });
-    }
-
-    // 清空搜索框（标签和搜索是独立的两套）
-    searchInput.value = '';
-    renderFilterResults(results, filter);
-  }
-
-  function updateTagActive(activeEl) {
-    var allTags = document.querySelectorAll('.filter-tag');
-    allTags.forEach(function (t) { t.classList.remove('active'); });
-    if (activeEl) {
-      activeEl.classList.add('active');
-    } else {
-      // 恢复"全部"为激活
-      var allTag = document.querySelector('.filter-tag[data-filter="all"]');
-      if (allTag) allTag.classList.add('active');
-    }
-  }
-
-  function renderFilterResults(results, filter) {
-    resultCount.style.display = 'block';
-    resultCount.innerHTML = '筛选 <strong>' + filter + '</strong>：找到 <strong>' + results.length + '</strong> 篇';
-
-    allYearSections.forEach(function (s) { s.style.display = 'none'; });
-
-    var oldResults = mainContent.querySelectorAll('.search-results');
-    oldResults.forEach(function (el) { el.remove(); });
-
-    if (results.length === 0) {
-      var empty = document.createElement('div');
-      empty.className = 'search-no-results search-results';
-      empty.innerHTML = '<p>该标签下暂无文章</p>';
-      mainContent.appendChild(empty);
-      return;
-    }
-
-    var byYear = {};
-    results.forEach(function (a) {
-      var year = a.date ? a.date.slice(0, 4) : '未分类';
-      if (!byYear[year]) byYear[year] = [];
-      byYear[year].push(a);
-    });
-
-    var years = Object.keys(byYear).sort().reverse();
-    years.forEach(function (year) {
-      var section = document.createElement('section');
-      section.className = 'year-section search-results';
-
-      var heading = document.createElement('h2');
-      heading.className = 'year-heading';
-      heading.innerHTML = year + ' 年 <span class="count">(' + byYear[year].length + ' 篇)</span>';
-      section.appendChild(heading);
-
-      byYear[year].forEach(function (a) {
-        var card = createArticleCard(a, '');
-        section.appendChild(card);
-      });
-
-      mainContent.appendChild(section);
-    });
-  }
-
-  // ============ 搜索逻辑 ============
-
   function onSearchInput() {
+    // 首次搜索时懒加载全文索引
+    if (!fulltextLoaded) {
+      fulltextLoaded = true;
+      fetch('fulltext.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          data.forEach(function (doc) {
+            fulltextMap[doc.slug] = doc.fulltext || doc.excerpt || '';
+          });
+          // 加载完后立即执行当前搜索
+          doSearch();
+        })
+        .catch(function () {});
+    }
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(doSearch, 250);
   }
 
   function doSearch() {
     var query = searchInput.value.trim();
+    if (!query) { clearSearch(); return; }
+    if (!articles.length) return;
 
-    if (!query) {
-      clearSearch();
-      return;
-    }
-
-    if (!articles.length) {
-      return;
-    }
-
-    // 分词：按空格或中文逐字
     var terms = query.split(/\s+/).filter(Boolean);
-    if (terms.length === 0) {
-      clearSearch();
-      return;
-    }
+    if (!terms.length) { clearSearch(); return; }
 
-    var results = articles.filter(function (article) {
-      return terms.every(function (term) {
-        return matchArticle(article, term);
+    // 全文评分
+    var scored = [];
+    articles.forEach(function (a, idx) {
+      var score = 0;
+      var title = (a.title || '').toLowerCase();
+      var ft = (fulltextMap[a.slug] || a.excerpt || '').toLowerCase();
+
+      terms.forEach(function (t) {
+        var tl = t.toLowerCase();
+        if (title.indexOf(tl) !== -1) score += 15;
+        var regex = new RegExp(tl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+        score += (ft.match(regex) || []).length * 2;
       });
+
+      if (score > 0) scored.push({ idx: idx, score: score });
     });
 
+    scored.sort(function (a, b) { return b.score - a.score; });
+
+    var results = scored.map(function (s) { return articles[s.idx]; });
     renderResults(results, query);
   }
 
-  function matchArticle(article, term) {
-    var lowerTerm = term.toLowerCase();
-
-    // 搜索标题
-    if (article.title && article.title.toLowerCase().indexOf(lowerTerm) !== -1) {
-      return true;
-    }
-    // 搜索摘要
-    if (article.excerpt && article.excerpt.toLowerCase().indexOf(lowerTerm) !== -1) {
-      return true;
-    }
-    // 搜索标签
-    if (article.tags && article.tags.some(function (t) {
-      return t.toLowerCase().indexOf(lowerTerm) !== -1;
-    })) {
-      return true;
-    }
-    // 搜索类型
-    if (article.type_cn && article.type_cn.indexOf(term) !== -1) {
-      return true;
-    }
-    return false;
-  }
-
-  // ============ 渲染结果 ============
-
   function renderResults(results, query) {
-    // 显示计数
     resultCount.style.display = 'block';
-    resultCount.innerHTML = '找到 <strong>' + results.length + '</strong> 篇相关文章';
+    resultCount.innerHTML = '找到 <strong>' + results.length + '</strong> 篇';
 
-    // 隐藏所有年份区块，重新构建
-    allYearSections.forEach(function (section) {
-      section.style.display = 'none';
-    });
+    allYearSections.forEach(function (s) { s.style.display = 'none'; });
+    var old = mainContent.querySelectorAll('.search-results');
+    old.forEach(function (el) { el.remove(); });
 
-    if (results.length === 0) {
-      showNoResults(query);
+    if (!results.length) {
+      var empty = document.createElement('div');
+      empty.className = 'search-no-results search-results';
+      empty.innerHTML = '<div class="no-results-icon">🔍</div><p>没有找到相关内容</p><p class="no-results-hint">试试换个关键词，或按 <kbd>Esc</kbd> 清除</p>';
+      mainContent.appendChild(empty);
       return;
     }
 
-    // 按年份分组
     var byYear = {};
     results.forEach(function (a) {
-      var year = a.date ? a.date.slice(0, 4) : '未分类';
-      if (!byYear[year]) byYear[year] = [];
-      byYear[year].push(a);
+      var y = a.date ? a.date.slice(0, 4) : '未分类';
+      if (!byYear[y]) byYear[y] = [];
+      byYear[y].push(a);
     });
 
-    // 移除旧的搜索结果区块
-    var oldResults = mainContent.querySelectorAll('.search-results');
-    oldResults.forEach(function (el) { el.remove(); });
-
-    // 生成搜索结果 HTML
-    var years = Object.keys(byYear).sort().reverse();
-    years.forEach(function (year) {
+    Object.keys(byYear).sort().reverse().forEach(function (year) {
       var section = document.createElement('section');
       section.className = 'year-section search-results';
-
-      var heading = document.createElement('h2');
-      heading.className = 'year-heading';
-      heading.innerHTML = year + ' 年 <span class="count">(' + byYear[year].length + ' 篇)</span>';
-      section.appendChild(heading);
-
+      section.innerHTML = '<h2 class="year-heading">' + year + ' 年 <span class="count">(' + byYear[year].length + ' 篇)</span></h2>';
       byYear[year].forEach(function (a) {
-        var card = createArticleCard(a, query);
-        section.appendChild(card);
+        section.appendChild(createCard(a, query));
       });
-
       mainContent.appendChild(section);
     });
   }
 
-  function createArticleCard(article, query) {
+  function createCard(a, query) {
     var card = document.createElement('a');
     card.className = 'article-card';
-    card.href = 'articles/' + article.slug + '.html';
+    var href = (a.type === 'pdf') ? (a.slug + '.html') : ('articles/' + a.slug + '.html');
+    card.href = href;
 
-    // 高亮匹配文字
-    var titleHtml = highlightText(article.title, query);
-    var excerptHtml = article.excerpt ? highlightText(article.excerpt, query) : '';
-
-    // 类型标签
-    var typeClass = article.type || 'article';
-    var tagsHtml = (article.tags || []).slice(0, 2).map(function (t) {
+    var title = highlight(a.title || '', query);
+    var excerpt = highlight((fulltextMap[a.slug] || a.excerpt || '').slice(0, 120), query);
+    var tags = (a.tags || []).slice(0, 2).map(function (t) {
       return '<span class="article-type">' + t + '</span>';
     }).join('');
 
     card.innerHTML =
       '<div class="article-meta">' +
-        '<span class="article-date">' + (article.date_display || '') + '</span>' +
-        '<span class="article-type ' + typeClass + '">' + (article.type_cn || '') + '</span>' +
-        tagsHtml +
+        '<span class="article-date">' + (a.date_display || '') + '</span>' +
+        '<span class="article-type ' + (a.type || '') + '">' + (a.type_cn || '') + '</span>' +
+        tags +
       '</div>' +
-      '<div class="article-title">' + titleHtml + '</div>' +
-      (excerptHtml ? '<div class="article-excerpt">' + excerptHtml + '</div>' : '');
+      '<div class="article-title">' + title + '</div>' +
+      (excerpt ? '<div class="article-excerpt">' + excerpt + '</div>' : '');
 
     return card;
   }
 
-  function highlightText(text, query) {
+  function highlight(text, query) {
     if (!text || !query) return text || '';
-
     var terms = query.split(/\s+/).filter(Boolean);
     var result = text;
-
-    terms.forEach(function (term) {
-      var escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      var regex = new RegExp('(' + escaped + ')', 'gi');
-      result = result.replace(regex, '<mark class="search-highlight">$1</mark>');
+    terms.forEach(function (t) {
+      var escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      result = result.replace(new RegExp('(' + escaped + ')', 'gi'), '<mark class="search-highlight">$1</mark>');
     });
-
     return result;
-  }
-
-  function showNoResults(query) {
-    var oldResults = mainContent.querySelectorAll('.search-results');
-    oldResults.forEach(function (el) { el.remove(); });
-
-    var empty = document.createElement('div');
-    empty.className = 'search-no-results search-results';
-    empty.innerHTML =
-      '<div class="no-results-icon">🔍</div>' +
-      '<p>没有找到与 "<strong>' + query + '</strong>" 相关的文章</p>' +
-      '<p class="no-results-hint">试试换个关键词，或按 <kbd>Esc</kbd> 清除搜索</p>';
-    mainContent.appendChild(empty);
   }
 
   function clearSearch() {
     if (resultCount) resultCount.style.display = 'none';
+    var old = mainContent.querySelectorAll('.search-results');
+    old.forEach(function (el) { el.remove(); });
+    allYearSections.forEach(function (s) { s.style.display = ''; });
+    currentTag = null;
+  }
 
-    // 移除搜索结果
-    var oldResults = mainContent.querySelectorAll('.search-results');
-    oldResults.forEach(function (el) { el.remove(); });
+  // ============ 标签筛选 ============
 
-    // 恢复原始年份区块
-    allYearSections.forEach(function (section) {
-      section.style.display = '';
+  function onTagClick(filter, tagEl) {
+    if (filter === 'all') { clearSearch(); updateTagActive(null); return; }
+    if (currentTag === filter) { clearSearch(); return; }
+    currentTag = filter;
+    updateTagActive(tagEl);
+    if (!articles.length) return;
+    var results = articles.filter(function (a) { return a.tags && a.tags.indexOf(filter) !== -1; });
+    searchInput.value = '';
+    renderFilterResults(results, filter);
+  }
+
+  function updateTagActive(activeEl) {
+    var all = document.querySelectorAll('.filter-tag');
+    all.forEach(function (t) { t.classList.remove('active'); });
+    if (activeEl) activeEl.classList.add('active');
+    else {
+      var a = document.querySelector('.filter-tag[data-filter="all"]');
+      if (a) a.classList.add('active');
+    }
+  }
+
+  function renderFilterResults(results, filter) {
+    resultCount.style.display = 'block';
+    resultCount.innerHTML = '筛选 <strong>' + filter + '</strong>：<strong>' + results.length + '</strong> 篇';
+    allYearSections.forEach(function (s) { s.style.display = 'none'; });
+    var old = mainContent.querySelectorAll('.search-results');
+    old.forEach(function (el) { el.remove(); });
+    if (!results.length) {
+      var empty = document.createElement('div');
+      empty.className = 'search-no-results search-results';
+      empty.innerHTML = '<p>该标签下暂无内容</p>';
+      mainContent.appendChild(empty);
+      return;
+    }
+    var byYear = {};
+    results.forEach(function (a) {
+      var y = a.date ? a.date.slice(0, 4) : '未分类';
+      if (!byYear[y]) byYear[y] = [];
+      byYear[y].push(a);
+    });
+    Object.keys(byYear).sort().reverse().forEach(function (year) {
+      var section = document.createElement('section');
+      section.className = 'year-section search-results';
+      section.innerHTML = '<h2 class="year-heading">' + year + ' 年 <span class="count">(' + byYear[year].length + ' 篇)</span></h2>';
+      byYear[year].forEach(function (a) { section.appendChild(createCard(a, '')); });
+      mainContent.appendChild(section);
     });
   }
 
-  // ============ 启动 ============
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
