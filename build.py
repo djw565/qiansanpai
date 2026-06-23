@@ -489,19 +489,46 @@ def main():
     pdf_files = sorted(PDF_DIR.glob("*.pdf")) if PDF_DIR.exists() else []
     print(f"\n[OK] 找到 {len(pdf_files)} 个 PDF 文件")
 
+    # 尝试加载 PDF 提取库
+    pdf_reader = None
+    try:
+        from PyPDF2 import PdfReader
+        pdf_reader = 'PyPDF2'
+    except:
+        pass
+
     for pdf_file in pdf_files:
         try:
             parsed = parse_pdf_filename(pdf_file.name)
             pdf_tags = classify_tags(parsed['title'])
             if 'PDF案例' not in pdf_tags:
                 pdf_tags.append('PDF案例')
+
+            # 提取 PDF 文字
+            pdf_text = ''
+            if pdf_reader == 'PyPDF2':
+                try:
+                    reader = PdfReader(str(pdf_file))
+                    for page in reader.pages:
+                        t = page.extract_text()
+                        if t:
+                            pdf_text += t + '\n'
+                    pdf_text = pdf_text.strip()
+                except:
+                    pdf_text = ''
+
+            excerpt = 'PDF 案例文档 — 点击下载或在线查看'
+            if pdf_text:
+                excerpt = pdf_text[:150].replace('\n', ' ') + '…'
+
             articles.append({
                 **parsed,
-                'slug': 'pdf/' + pdf_file.name,  # 直接链接到PDF
-                'excerpt': 'PDF 案例文档 — 点击下载或在线查看',
+                'slug': 'pdf/' + pdf_file.name,
+                'excerpt': excerpt,
                 'filename': pdf_file.name,
                 'tags': pdf_tags,
-                'char_count': 0,
+                'char_count': len(pdf_text),
+                'fulltext': pdf_text,
             })
             print(f"  [PDF] {parsed['date']} | {parsed['title'][:40]}")
         except Exception as e:
