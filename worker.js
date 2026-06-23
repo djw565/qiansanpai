@@ -14,10 +14,16 @@ export default {
       return new Response('POST only', { status: 405 });
     }
 
-    const { question, context, isFirst } = await request.json();
+    const { question, context, isFirst, mode } = await request.json();
 
-    const firstTurnHint = isFirst
+    // 自动判断模式
+    const isConcept = mode === 'concept' || isConceptQuestion(question);
+    const firstTurnHint = (!isConcept && isFirst)
       ? '\n\n⚠️ 这是用户的第一条消息。你绝对不能给结论。只能追问。回复中只能有问句。'
+      : '';
+
+    const modeHint = isConcept
+      ? '\n\n📖 用户问的是一个概念/方法论问题。直接解释这个概念，引用知识库中的定义和案例。不需要追问用户个人情况。150-300字。'
       : '';
 
     const systemPrompt = `## 🚨 最高优先级：聊天式诊断协议
@@ -135,7 +141,7 @@ export default {
 
 ${context || '（今日暂无相关案例）'}
 
-请基于以上方法论和知识库参考回答用户。如果知识库内容与问题高度相关，引用其中的观点和案例。你需要真正模仿子休的对话节奏——先追问，后诊断，金句收尾。回答长度控制在200-400字。${firstTurnHint}`;
+请基于以上方法论和知识库参考回答用户。如果知识库内容与问题高度相关，引用其中的观点和案例。你需要真正模仿子休的对话节奏——先追问，后诊断，金句收尾。回答长度控制在200-400字。${firstTurnHint}${modeHint}`;
 
     try {
       const aiResp = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -178,3 +184,15 @@ ${context || '（今日暂无相关案例）'}
     }
   },
 };
+
+// 自动判断是否为概念类问题
+function isConceptQuestion(q) {
+  const patterns = [
+    /^什么是/, /是什么意思/, /怎么理解/, /什么叫/,
+    /解释一下/, /讲讲/, /说说.*概念/, /.*的定义/,
+    /^如何.*分析/, /^怎么用.*分析/,
+  ];
+  // 短问题 + 没有"我" → 大概率是概念问
+  const isShortAndImpersonal = q.length < 30 && !/我/.test(q);
+  return patterns.some(p => p.test(q)) || isShortAndImpersonal;
+}
