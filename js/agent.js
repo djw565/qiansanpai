@@ -127,7 +127,7 @@
     fetch(API_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: query, context: context }),
+      body: JSON.stringify({ question: query, context: context, isFirst: questionCount <= 1 }),
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
