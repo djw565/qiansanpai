@@ -493,7 +493,11 @@ description: |
 
 > 基于前三排知识库 43 concepts + 4 syntheses + 82 TXT + 53 PDF 编译
 > 创建日期：2026-06-03
-`;
+
+## 当前对话的知识库参考（今日搜索到的相关文章，请引用其中的观点和案例）
+${context || '（暂无相关文章匹配）'}
+
+请基于以上方法论和知识库参考回答用户。${firstTurnHint}${modeHint}`;
 
     try {
       const aiResp = await fetch('https://api.deepseek.com/v1/chat/completions', {
