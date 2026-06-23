@@ -310,15 +310,15 @@ def build_index_page(articles: list):
             excerpt = a.get('excerpt', '')
             excerpt_html = f'<div class="article-excerpt">{excerpt}</div>' if excerpt else ''
 
-            # PDF 和 TXT 的链接路径不同
+            # PDF 现在也有 HTML 页面了
             if a['type'] == 'pdf':
-                href = a['slug']  # pdf/filename.pdf
+                href = a['slug'] + '.html'  # articles/pdf_xxx.html
                 link_icon = ' 📄'
             else:
                 href = f"articles/{a['slug']}.html"
                 link_icon = ''
 
-            card = f'''      <a href="{href}" class="article-card"{' target="_blank"' if a['type'] == 'pdf' else ''}>
+            card = f'''      <a href="{href}" class="article-card">
         <div class="article-meta">
           <span class="article-date">{a['date_display']}</span>
           <span class="article-type {a['type']}">{a['type_cn']}</span>
@@ -521,9 +521,18 @@ def main():
             if pdf_text:
                 excerpt = pdf_text[:150].replace('\n', ' ') + '…'
 
+            # 为 PDF 生成 HTML 在线阅读页
+            pdf_slug = 'pdf_' + generate_slug(parsed, pdf_file.name)
+            pdf_html_body = text_to_html_paragraphs(pdf_text) if pdf_text else '<p>（此 PDF 为扫描件，无法提取文字）</p>'
+
+            # 带下载链接的正文
+            pdf_html_body = f'<p style="text-align:center;margin-bottom:2rem;"><a href="pdf/{html.escape(pdf_file.name)}" target="_blank" style="display:inline-block;padding:0.5rem 1.5rem;background:#c44d4d;color:#fff;border-radius:6px;text-decoration:none;">📥 下载原始 PDF</a></p>\n' + pdf_html_body
+
+            build_article_page(parsed, pdf_slug, pdf_html_body)
+
             articles.append({
                 **parsed,
-                'slug': 'pdf/' + pdf_file.name,
+                'slug': 'articles/' + pdf_slug,  # 链接到HTML页面
                 'excerpt': excerpt,
                 'filename': pdf_file.name,
                 'tags': pdf_tags,
