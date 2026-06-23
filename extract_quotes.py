@@ -111,6 +111,18 @@ def is_good_quote(text: str) -> bool:
     if text.count('，') > 4:
         return False
 
+    # emoji 前缀 → 排除
+    if any(ord(c) > 0x2600 for c in text[:3]):
+        return False
+
+    # 重复/口吃式表达 → 排除
+    stutter_patterns = [
+        r'(.{5,15})\1',   # 连续重复5-15字的片段
+    ]
+    for pat in stutter_patterns:
+        if re.search(pat, text):
+            return False
+
     # ===== 第2关：质量评分 =====
 
     score = 0
