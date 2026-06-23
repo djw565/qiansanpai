@@ -52,8 +52,10 @@
     var filterTags = document.querySelectorAll('.filter-tag');
     filterTags.forEach(function (tag) {
       tag.addEventListener('click', function (e) {
-        e.preventDefault();
         var filter = this.getAttribute('data-filter');
+        // 只有带 data-filter 的标签才拦截（AI问答等链接正常跳转）
+        if (!filter) return;
+        e.preventDefault();
         onTagClick(filter, this);
       });
     });
