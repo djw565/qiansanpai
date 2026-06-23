@@ -16,12 +16,60 @@
   var sendBtn = null;
   var isLoading = false;
   var questionCount = 0;
+  var chatHistory = [];
+
+  // ====== 聊天记录持久化 ======
+  var STORAGE_KEY = 'zixiu_chat_history';
+
+  function saveHistory() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory.slice(-50))); // 保留最近50条
+    } catch(e) {}
+  }
+
+  function loadHistory() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) chatHistory = JSON.parse(raw);
+    } catch(e) { chatHistory = []; }
+  }
+
+  function restoreChat() {
+    chatHistory.forEach(function (msg) {
+      if (msg.role === 'user') {
+        appendMsgEl('user', msg.content);
+      } else {
+        appendMsgEl('agent', msg.content);
+      }
+    });
+    if (chatHistory.length) {
+      var intro = document.querySelector('.agent-intro');
+      if (intro) intro.style.display = 'none';
+    }
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+
+  function clearHistory() {
+    if (confirm('确定清空所有聊天记录？')) {
+      chatHistory = [];
+      localStorage.removeItem(STORAGE_KEY);
+      chatArea.innerHTML = '';
+      var intro = document.querySelector('.agent-intro');
+      if (intro) intro.style.display = '';
+      questionCount = 0;
+    }
+  }
+  // 暴露给 onclick
+  window.clearHistory = clearHistory;
 
   function init() {
     chatArea = document.getElementById('chat-area');
     inputEl = document.getElementById('agent-input');
     sendBtn = document.getElementById('agent-send');
     if (!chatArea || !inputEl || !sendBtn) return;
+
+    // 加载聊天记录
+    loadHistory();
 
     sendBtn.addEventListener('click', handleSend);
     inputEl.addEventListener('keydown', function (e) {
@@ -69,7 +117,11 @@
 
     function checkReady() {
       if (loaded >= target) {
-        addSystemMsg('我是子休。前三排社群主理人。用辩证唯物主义的方法分析现实问题。说说你遇到的事儿？');
+        if (chatHistory.length === 0) {
+          addSystemMsg('我是子休。前三排社群主理人。用辩证唯物主义的方法分析现实问题。说说你遇到的事儿？');
+        } else {
+          restoreChat();
+        }
       }
     }
   }
@@ -368,21 +420,28 @@
   // ============ UI ============
 
   function addUserMsg(text) {
+    chatHistory.push({ role: 'user', content: text });
+    saveHistory();
+    appendMsgEl('user', text);
+  }
+
+  function addAgentMsg(html) {
+    chatHistory.push({ role: 'agent', content: html });
+    saveHistory();
+    appendMsgEl('agent', html);
+  }
+
+  function appendMsgEl(role, content) {
     var div = document.createElement('div');
-    div.className = 'msg msg-user';
-    div.innerHTML = '<div class="msg-bubble">' + text + '</div>';
+    div.className = 'msg msg-' + role;
+    var cls = role === 'user' ? 'msg-bubble' : 'msg-bubble';
+    div.innerHTML = '<div class="' + cls + '">' + content + '</div>';
     chatArea.appendChild(div);
     chatArea.scrollTop = chatArea.scrollHeight;
   }
 
-  function addAgentMsg(html) {
-    var div = document.createElement('div');
-    div.className = 'msg msg-agent';
-    div.innerHTML = '<div class="msg-bubble">' + html + '</div>';
-    chatArea.appendChild(div);
-  }
-
   function addSystemMsg(text) {
+    // 系统消息不存历史
     var div = document.createElement('div');
     div.className = 'msg msg-agent';
     div.innerHTML = '<div class="msg-bubble" style="font-size:0.85rem;color:var(--text-secondary);text-align:center;border:1px dashed var(--border);">' + text + '</div>';
