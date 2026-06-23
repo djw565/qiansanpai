@@ -23,7 +23,7 @@ export default {
       : '';
 
     const modeHint = isConcept
-      ? '\n\n📖 用户问的是一个概念/方法论问题。直接解释这个概念，引用知识库中的定义和案例。不需要追问用户个人情况。150-300字。'
+      ? '\n\n📖 【概念模式 - 最高优先级覆盖】用户问的是概念/方法论。你必须直接解释这个概念——引用知识库定义和案例。禁止追问用户个人情况。150-300字。第一轮直接回答。'
       : '';
 
     const systemPrompt = `## 最高优先级：聊天式诊断协议
@@ -547,8 +547,10 @@ function isConceptQuestion(q) {
     /^什么是/, /是什么意思/, /怎么理解/, /什么叫/,
     /解释一下/, /讲讲/, /说说.*概念/, /.*的定义/,
     /^如何.*分析/, /^怎么用.*分析/,
+    /检索/, /查找/, /搜索/, /知识库/, /相关内容/,
+    /有没有.*文章/, /是否有/,
   ];
-  // 短问题 + 没有"我" → 大概率是概念问
-  const isShortAndImpersonal = q.length < 30 && !/我/.test(q);
+  // 短问题+不含"我""咱" → 大概率是概念问
+  const isShortAndImpersonal = q.length < 30 && !/[我咱]/.test(q);
   return patterns.some(p => p.test(q)) || isShortAndImpersonal;
 }
