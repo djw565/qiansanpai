@@ -6,107 +6,56 @@
   <title>概念库 — 前三排 · 学习小组</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .concept-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 1rem;
-      padding: 1rem 0;
-    }
-    .concept-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      box-shadow: var(--shadow);
-      border-left: 3px solid var(--accent);
-      transition: all 0.2s;
-    }
-    .concept-card:hover {
-      box-shadow: var(--shadow-hover);
-      transform: translateY(-2px);
-    }
-    .concept-name {
-      font-weight: 700;
-      font-size: 1.05rem;
-      color: var(--accent);
-      margin-bottom: 0.5rem;
-      font-family: var(--font-serif);
-    }
-    .concept-desc {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-    .concept-search {
-      width: 100%;
-      padding: 0.7rem 1rem;
-      border: 2px solid var(--border);
-      border-radius: 25px;
-      font-size: 0.95rem;
-      outline: none;
-      margin-bottom: 1.5rem;
-      font-family: var(--font-sans);
-    }
-    .concept-search:focus { border-color: var(--accent); }
-    .concept-count {
-      text-align: center;
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-      margin-bottom: 1rem;
-    }
-    @media (max-width: 600px) {
-      .concept-grid { grid-template-columns: 1fr; }
-    }
+    body { background: #fdfaf6; font-family: "PingFang SC","Microsoft YaHei",sans-serif; }
+    .concepts-hero { text-align:center; padding:3rem 1rem 2rem; }
+    .concepts-hero h1 { font-size:2rem; margin-bottom:0.5rem; }
+    .concepts-hero p { color:#6b6b6b; }
+    .domain { max-width:900px; margin:0 auto 2rem; padding:0 1rem; }
+    .domain h2 { font-size:1.3rem; color:#c44d4d; border-bottom:2px solid #c44d4d; padding-bottom:0.4rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+    .domain h2 .count { font-size:0.8rem; color:#999; font-weight:400; }
+    .domain-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:0.7rem; }
+    .concept-card { display:block; background:#fff; border-radius:8px; padding:1rem 1.2rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); text-decoration:none; color:#2c2c2c; transition:all 0.2s; border-left:3px solid #c44d4d; }
+    .concept-card:hover { box-shadow:0 4px 12px rgba(0,0,0,0.1); transform:translateY(-2px); }
+    .concept-card h3 { font-size:1rem; margin-bottom:0.3rem; }
+    .concept-card p { font-size:0.8rem; color:#6b6b6b; line-height:1.5; margin:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .concept-card .complexity { display:inline-block; font-size:0.65rem; padding:0.1rem 0.4rem; border-radius:8px; margin-left:0.4rem; background:#f5ede1; color:#8b7355; }
+    .concept-search { display:block; max-width:500px; margin:0 auto 1.5rem; padding:0.7rem 1rem; border:2px solid #e8e0d5; border-radius:25px; font-size:0.95rem; outline:none; font-family:inherit; width:100%; }
+    .concept-search:focus { border-color:#c44d4d; }
+    .back-home { text-align:center; padding:1rem 0 2rem; }
+    .back-home a { color:#c44d4d; text-decoration:none; }
+    @media (max-width:600px) { .domain-grid { grid-template-columns:1fr; } .concepts-hero h1 { font-size:1.5rem; } }
   </style>
 </head>
 <body>
-
+  <script src="js/auth.js"></script>
 <header class="site-header">
   <div class="site-title"><span class="accent">前三排</span> · 概念库</div>
-  <div class="site-subtitle">子休辩证唯物主义心理学 — 43个核心分析工具</div>
+  <div class="site-subtitle">子休辩证唯物主义心理学 — 43个核心分析工具 · 按MOC四大领域分类</div>
 </header>
-
-<main class="main-content">
-  <input type="text" id="concept-search" class="concept-search" placeholder="搜索概念…" autocomplete="off">
-  <div class="concept-count" id="concept-count"></div>
-  <div class="concept-grid" id="concept-grid"></div>
+<main style="padding:2rem 1rem 4rem;max-width:960px;margin:0 auto;"><div class="concepts-hero"><h1>43 个核心概念</h1><p>按四大领域分类 · 点击卡片查看完整定义与案例分析</p><input type="text" id="concept-search" class="concept-search" placeholder="搜索概念…" autocomplete="off"></div><section class="domain"><h2>个人成长（15） <span class="count">(14个)</span></h2><div class="domain-grid"><a href="concept-pages/第一责任人.html" class="concept-card"><h3>第一责任人<span class="complexity">low</span></h3><p>&gt; **你必须是你自己生活的第一责任人。如果你不为自己负责，没有人会为你负责。**</p></a><a href="concept-pages/挑骨头模块.html" class="concept-card"><h3>挑骨头模块<span class="complexity">low</span></h3><p>&gt; **&quot;鸡蛋里挑骨头&quot;——在繁杂的选项中通过系统化的减法找到最优决策。**</p></a><a href="concept-pages/打铁还需自身硬.html" class="concept-card"><h3>打铁还需自身硬<span class="complexity">low</span></h3><p>&gt; **打铁还需自身硬，发展才是硬道理。**</p></a><a href="concept-pages/否定之否定成长路径.html" class="concept-card"><h3>否定之否定成长路径<span class="complexity">medium</span></h3><p>&gt; **先承认不足 → 在实践中超越 → 最终发现不足不重要。**</p></a><a href="concept-pages/学生思维与职场思维.html" class="concept-card"><h3>学生思维与职场思维<span class="complexity">medium</span></h3><p>&gt; **职场的目标是解决问题，而不是系统性地学习。**</p></a><a href="concept-pages/思维三阶模型.html" class="concept-card"><h3>思维三阶模型<span class="complexity">high</span></h3><p>**思维三阶模型**是前三排社群描述认知层次递进的核心框架：</p></a><a href="concept-pages/真懂与假懂.html" class="concept-card"><h3>真懂与假懂<span class="complexity">low</span></h3><p>&gt; **&quot;道理我都懂，但我依然过不好这一生。&quot;** — 其实你没真懂，你只是以为自己懂了。</p></a><a href="concept-pages/以身入局.html" class="concept-card"><h3>以身入局<span class="complexity">medium</span></h3><p>&gt; **只有&quot;以身入局&quot;带来的情绪记忆，才能真正推动你思考生活、改变人生。**</p></a><a href="concept-pages/脱实向虚.html" class="concept-card"><h3>脱实向虚<span class="complexity">medium</span></h3><p>**脱实向虚**原为经济学概念（资金从实体经济流向虚拟经济），前三排社群借用此概念描述个人思维和行为的偏差——**用虚幻的&quot;努力&quot;替代真实的行动**。</p></a><a href="concept-pages/自欺欺人.html" class="concept-card"><h3>自欺欺人<span class="complexity">medium</span></h3><p>自欺欺人是前三排社群对人性的**核心判断**：人普遍存在自我欺骗且**不自知**，这是阻碍个体改变的根本障碍。</p></a><a href="concept-pages/诊断标签作为逃避许可证.html" class="concept-card"><h3>诊断标签作为逃避许可证<span class="complexity">medium</span></h3><p>&gt; **&quot;我有ADHD（抑郁症/焦虑症/XXX），所以我做不到。&quot;** — 你把诊断当成了&quot;可以不用努力&quot;的许可证。</p></a><a href="concept-pages/极值法.html" class="concept-card"><h3>极值法<span class="complexity">low</span></h3><p>**极值法**是前三排社群用于测试一个人真实意图/态度的工具——通过提出极端假设条件，去除外部干扰因素，暴露当事人的真实想法。</p></a><a href="concept-pages/抓主要矛盾.html" class="concept-card"><h3>抓主要矛盾<span class="complexity">high</span></h3><p>**抓主要矛盾**是前三排社群最根本的分析方法论，源自马克思主义辩证唯物主义，指导如何在复杂的现实问题中找到决定性的关键矛盾。</p></a><a href="concept-pages/ORID模型.html" class="concept-card"><h3>ORID模型<span class="complexity">low</span></h3><p>&gt; **&quot;乱的时候先给问题找个结构。&quot;**</p></a></div></section><section class="domain"><h2>职场（14） <span class="count">(13个)</span></h2><div class="domain-grid"><a href="concept-pages/生态位分析.html" class="concept-card"><h3>生态位分析<span class="complexity">high</span></h3><p>生态位分析是前三排社群的核心分析框架，借用生物学&quot;生态位&quot;概念，指**个人在组织/关系中所处的位置决定了其命运**。脱离生态位谈个人能力，是空谈。</p></a><a href="concept-pages/权责对等.html" class="concept-card"><h3>权责对等<span class="complexity">low</span></h3><p>**权责对等**原则：一个人的权力和责任必须严格对应。有多大的权限，才需要承担多大的责任。</p></a><a href="concept-pages/存量与增量.html" class="concept-card"><h3>存量与增量<span class="complexity">medium</span></h3><p>**存量与增量**是前三排社群分析个人/组织价值排序的核心维度。在一个组织中，**创造增量的人永远排在保护存量的人前面**。</p></a><a href="concept-pages/外战内行内战内行.html" class="concept-card"><h3>外战内行内战内行<span class="complexity">medium</span></h3><p>&gt; **如果你想做事，不仅&quot;外战&quot;要内行，同时&quot;内战&quot;也得内行，两手都得硬。**</p></a><a href="concept-pages/利润中心与成本中心.html" class="concept-card"><h3>利润中心与成本中心<span class="complexity">medium</span></h3><p>**利润中心**和**成本中心**是前三排社群分析公司内部权力结构的一对核心概念，揭示了资源的流向和权力的归属。</p></a><a href="concept-pages/昏倒羊.html" class="concept-card"><h3>昏倒羊<span class="complexity">low</span></h3><p>**昏倒羊**是前三排社群中的一个生动隐喻，指在混乱局势中因为主动暴露自己而被&quot;干掉&quot;的人。</p></a><a href="concept-pages/留痕原则.html" class="concept-card"><h3>留痕原则<span class="complexity">low</span></h3><p>**留痕原则**是前三排社群强调的职场自我保护第一条金科玉律：所有超出常规的操作、所有涉及责任确认的事项，必须有书面的确认流程。</p></a><a href="concept-pages/流量分配权决定收入上限.html" class="concept-card"><h3>流量分配权决定收入上限<span class="complexity">medium</span></h3><p>&gt; **谁分配流量，谁就决定你的收入上限。个人能力不是天花板，分配权才是。**</p></a><a href="concept-pages/体制投名状论.html" class="concept-card"><h3>体制投名状论<span class="complexity">high</span></h3><p>&gt; **体制不需要人才，但领导需要投名状。**</p></a><a href="concept-pages/杨修陷阱.html" class="concept-card"><h3>杨修陷阱（聪明反被聪明误）<span class="complexity">medium</span></h3><p>&gt; **不要在不对的时候，用不对的方式，展示你的聪明。**</p></a><a href="concept-pages/窄桥策略.html" class="concept-card"><h3>窄桥策略（主动找窄门）<span class="complexity">low</span></h3><p>&gt; **主动去解决那些别人不愿意做的窄桥问题，你就能把自己塑造成不可替代的角色。**</p></a><a href="concept-pages/直系领导才是朋友.html" class="concept-card"><h3>直系领导才是朋友<span class="complexity">low</span></h3><p>&gt; **直系领导才是朋友，同事之间反而是竞争关系。**</p></a><a href="concept-pages/冲突博弈框架.html" class="concept-card"><h3>冲突博弈框架<span class="complexity">high</span></h3><p>&gt; **吵架不是说服对方，是说服围观的人。你吵赢的那次，关系可能没了。**</p></a></div></section><section class="domain"><h2>原生家庭（7） <span class="count">(6个)</span></h2><div class="domain-grid"><a href="concept-pages/人是社会关系的总和.html" class="concept-card"><h3>人是社会关系的总和<span class="complexity">medium</span></h3><p>&gt; **&quot;人的本质不是单个人所固有的抽象物，在其现实性上，它是一切社会关系的总和。&quot;** — 卡尔·马克思《关于费尔巴哈的提纲》</p></a><a href="concept-pages/经济基础决定上层建筑.html" class="concept-card"><h3>经济基础决定上层建筑<span class="complexity">medium</span></h3><p>前三排社群将马克思主义这一经典命题作为**社会现象分析的工具**，用来理解个体行为、社会思潮背后的物质驱动力。</p></a><a href="concept-pages/课题分离.html" class="concept-card"><h3>课题分离<span class="complexity">medium</span></h3><p>**课题分离**源自阿德勒心理学，前三排社群将其与[[抓主要矛盾]]结合使用：**分清什么是&quot;我的事&quot;，什么是&quot;别人的事&quot;，不要在别人的课题上浪费精力。**</p></a><a href="concept-pages/多元评价体系.html" class="concept-card"><h3>多元评价体系<span class="complexity">low</span></h3><p>**多元评价体系**是指一个人不应将自己全部的自我价值感和社会关系需求寄托在单一段关系或单一角色上，而应建立多个维度的自我评价来源。</p></a><a href="concept-pages/不扛事人格.html" class="concept-card"><h3>不扛事人格（面疙瘩/六国论模式）<span class="complexity">medium</span></h3><p>&gt; **今日割五城，明日割十城，然后得一夕安寝。起视四境，而秦兵又至矣。** — 苏洵《六国论》</p></a><a href="concept-pages/性格是特点不是缺点.html" class="concept-card"><h3>性格是特点不是缺点<span class="complexity">low</span></h3><p>&gt; **所有的性格都是特点，放在对的环境就是优点，放在不对的环境就是缺点。**</p></a></div></section><section class="domain"><h2>亲密关系（5） <span class="count">(5个)</span></h2><div class="domain-grid"><a href="concept-pages/二阶思维.html" class="concept-card"><h3>二阶思维<span class="complexity">medium</span></h3><p>二阶思维（Second-order Thinking）是前三排社群最核心的分析工具之一，指**超越表象追问深层原因**的思维方式。</p></a><a href="concept-pages/静态人物与动态人物.html" class="concept-card"><h3>静态人物与动态人物<span class="complexity">medium</span></h3><p>**静态人物**和**动态人物**原为文学批评中的概念，前三排社群借用此框架来区分人面对人生困境时的两种根本状态。</p></a><a href="concept-pages/自我攻击.html" class="concept-card"><h3>自我攻击<span class="complexity">high</span></h3><p>**自我攻击**是前三排社群识别的深层心理模式：一个人不在外部解决问题，反而转向内部攻击自己，通过否定自身来维持扭曲的认知平衡。</p></a><a href="concept-pages/习得性无助.html" class="concept-card"><h3>习得性无助<span class="complexity">medium</span></h3><p>**习得性无助**是心理学经典概念，前三排社群用于描述长期被困在痛苦关系中的人形成的心理定势——**并非真的无力改变，而是认定&quot;逃出去也没用&quot;。**</p></a><a href="concept-pages/自欺欺人.html" class="concept-card"><h3>自欺欺人<span class="complexity">medium</span></h3><p>自欺欺人是前三排社群对人性的**核心判断**：人普遍存在自我欺骗且**不自知**，这是阻碍个体改变的根本障碍。</p></a></div></section>
+<div class="back-home">
+  <a href="index.html">← 返回文章目录</a> | <a href="agent.html">💬 子休问答</a>
+</div>
 </main>
-
-<footer class="site-footer">
-  <p><a href="index.html">← 返回文章目录</a> | <a href="agent.html">💬 子休问答</a></p>
-</footer>
-
-<script>
-(function () {
-  fetch('concepts.json')
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      var concepts = data.concepts || {};
-      var names = Object.keys(concepts);
-      renderGrid(concepts, names);
-
-      document.getElementById('concept-search').addEventListener('input', function () {
-        var q = this.value.trim();
-        if (!q) { renderGrid(concepts, names); return; }
-        var filtered = names.filter(function (n) {
-          return n.indexOf(q) !== -1 || concepts[n].indexOf(q) !== -1;
-        });
-        renderGrid(concepts, filtered);
-      });
-    });
-
-  function renderGrid(concepts, names) {
-    document.getElementById('concept-count').textContent = '共 ' + names.length + ' 个概念';
-    var grid = document.getElementById('concept-grid');
-    grid.innerHTML = '';
-    names.sort(function (a, b) { return a.localeCompare(b, 'zh'); });
-    names.forEach(function (name) {
-      var card = document.createElement('div');
-      card.className = 'concept-card';
-      card.innerHTML = '<div class="concept-name">' + name + '</div><div class="concept-desc">' + concepts[name] + '</div>';
-      grid.appendChild(card);
-    });
-  }
-})();
-</script>
 </body>
 </html>
+<script>
+(function(){
+  var cards = document.querySelectorAll('.concept-card');
+  var domains = document.querySelectorAll('.domain');
+  document.getElementById('concept-search').addEventListener('input',function(){
+    var q = this.value.trim().toLowerCase();
+    if(!q){ cards.forEach(function(c){c.style.display='';}); domains.forEach(function(d){d.style.display='';}); return; }
+    var found = false;
+    cards.forEach(function(c){
+      var t = c.textContent.toLowerCase();
+      if(t.indexOf(q)!==-1){ c.style.display=''; found=true; }
+      else { c.style.display='none'; }
+    });
+    domains.forEach(function(d){
+      var vis = Array.from(d.querySelectorAll('.concept-card')).some(function(c){return c.style.display!=='none';});
+      d.style.display = vis ? '' : 'none';
+    });
+  });
+})();
+</script>
