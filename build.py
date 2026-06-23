@@ -342,10 +342,15 @@ def build_index_page(articles: list):
 </nav>
 
 <main class="main-content">
+  <div class="search-container">
+    <span class="search-icon">&#x1F50D;</span>
+    <input type="text" id="search-input" class="search-input" placeholder="搜索文章标题、关键词..." autocomplete="off">
+  </div>
   {stats_html}
 {chr(10).join(year_sections)}
 </main>
 
+<script src="js/search.js"></script>
 {SITE_FOOTER}'''
 
     with open(INDEX_FILE, 'w', encoding='utf-8') as f:

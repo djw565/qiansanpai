@@ -142,6 +142,91 @@ body {
   margin-top: 0.15rem;
 }
 
+/* === Search === */
+.search-container {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 2px solid var(--border);
+  border-radius: 25px;
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  background: var(--card-bg);
+  color: var(--text);
+  transition: all 0.25s;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(196, 77, 77, 0.1);
+}
+
+.search-input::placeholder {
+  color: #bbb;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #bbb;
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.search-result-count {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 0.5rem 0 1rem;
+}
+
+.search-result-count strong {
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+
+.search-highlight {
+  background: #ffe4b8;
+  padding: 0.05em 0.15em;
+  border-radius: 3px;
+}
+
+.search-no-results {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+}
+
+.search-no-results .no-results-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.search-no-results p {
+  margin-bottom: 0.5rem;
+}
+
+.no-results-hint {
+  font-size: 0.8rem;
+  color: #bbb;
+}
+
+.no-results-hint kbd {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  background: #f5f5f5;
+}
+
 /* === Year Section === */
 .year-section {
   margin-bottom: 2.5rem;
