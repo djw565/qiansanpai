@@ -351,6 +351,11 @@ def build_index_page(articles: list):
 </nav>
 
 <main class="main-content">
+  <div id="daily-quote" class="daily-quote">
+    <div class="daily-quote-label">✦ 每日金句</div>
+    <div class="daily-quote-text" id="quote-text">加载中...</div>
+    <div class="daily-quote-source" id="quote-source"></div>
+  </div>
   <div class="search-container">
     <span class="search-icon">&#x1F50D;</span>
     <input type="text" id="search-input" class="search-input" placeholder="搜索文章标题、关键词..." autocomplete="off">
@@ -359,6 +364,7 @@ def build_index_page(articles: list):
 {chr(10).join(year_sections)}
 </main>
 
+<script src="js/daily-quote.js"></script>
 <script src="js/search.js"></script>
 {SITE_FOOTER}'''
 

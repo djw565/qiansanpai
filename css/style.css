@@ -142,6 +142,52 @@ body {
   margin-top: 0.15rem;
 }
 
+/* === Daily Quote === */
+.daily-quote {
+  background: linear-gradient(135deg, #fdf6f0 0%, #fef9f4 100%);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.daily-quote-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.daily-quote-text {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--text);
+  font-style: italic;
+}
+
+.daily-quote-source {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.6rem;
+  text-align: right;
+}
+
+.daily-quote-source a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.daily-quote-source a:hover {
+  text-decoration: underline;
+}
+
 /* === Search === */
 .search-container {
   margin-bottom: 1.5rem;

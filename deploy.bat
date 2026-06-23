@@ -5,19 +5,25 @@ echo ========================================
 echo   前三排 · 网站更新部署
 echo ========================================
 echo.
-echo [1/3] 重新生成网站页面...
+echo [1/4] 提取金句...
+python extract_quotes.py
+if errorlevel 1 (
+    echo 金句提取失败（不影响主流程）
+)
+echo.
+echo [2/4] 重新生成网站页面...
 python build.py
 if errorlevel 1 (
-    echo ❌ 构建失败，请检查错误信息
+    echo 构建失败，请检查错误信息
     pause
     exit /b 1
 )
 echo.
-echo [2/3] 提交更新...
+echo [3/4] 提交更新...
 git add .
 git commit -m "更新文章内容 %date%"
 echo.
-echo [3/3] 推送到 GitHub...
+echo [4/4] 推送到 GitHub...
 git push
 echo.
 echo ========================================
