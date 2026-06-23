@@ -205,9 +205,9 @@ HTML_HEAD = '''<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="{auth_path}auth.js"></script>
 </head>
-<body>'''
+<body>
+  <script src="{auth_path}auth.js"></script>'''
 
 SITE_HEADER = '''
 <header class="site-header">

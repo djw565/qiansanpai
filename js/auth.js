@@ -15,12 +15,16 @@
   var SESSION_KEY = '_qsp_auth';
   var AUTH_DURATION = 24 * 60 * 60 * 1000; // 24小时
 
-  // 已登录则跳过
-  if (sessionStorage.getItem(SESSION_KEY) === HASH) return;
+  // 先隐藏页面内容
+  var hideStyle = document.createElement('style');
+  hideStyle.id = '_auth_hide';
+  hideStyle.textContent = 'body > *:not(#auth-gate) { display: none !important; }';
+  document.head.appendChild(hideStyle);
 
-  // 检查 cookie（跨标签页共享）
-  if (getCookie('_qsp_auth') === HASH) {
+  // 已登录则跳过
+  if (sessionStorage.getItem(SESSION_KEY) === HASH || getCookie('_qsp_auth') === HASH) {
     sessionStorage.setItem(SESSION_KEY, HASH);
+    hideStyle.remove();
     return;
   }
 
@@ -64,9 +68,11 @@
       sessionStorage.setItem(SESSION_KEY, HASH);
       // 设置 cookie，24小时有效
       setCookie('_qsp_auth', HASH, 1);
-      // 移除密码门
+      // 移除密码门 + 恢复页面
       var gate = document.getElementById('auth-gate');
       if (gate) gate.remove();
+      var hs = document.getElementById('_auth_hide');
+      if (hs) hs.remove();
     } else {
       var errorEl = document.getElementById('auth-error');
       if (errorEl) errorEl.style.display = 'block';
