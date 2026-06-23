@@ -205,6 +205,7 @@ HTML_HEAD = '''<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="{auth_path}auth.js"></script>
 </head>
 <body>'''
 
@@ -229,7 +230,7 @@ def build_article_page(parsed: dict, slug: str, html_body: str):
     tags_html = ' '.join(f'<span class="article-type {parsed["type"]}">{parsed["type_cn"]}</span>' +
                          ''.join(f'<span class="article-type">{t}</span>' for t in tags))
 
-    content = f'''{HTML_HEAD.format(title=html.escape(parsed["title"]), css_path="../css/")}
+    content = f'''{HTML_HEAD.format(title=html.escape(parsed["title"]), css_path="../css/", auth_path="../js/")}
 {SITE_HEADER}
 
 <main class="article-page">
@@ -334,7 +335,7 @@ def build_index_page(articles: list):
     </section>'''
         year_sections.append(year_section)
 
-    content = f'''{HTML_HEAD.format(title="首页", css_path="css/")}
+    content = f'''{HTML_HEAD.format(title="首页", css_path="css/", auth_path="js/")}
 {SITE_HEADER}
 
 <nav class="nav-bar">
