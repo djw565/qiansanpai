@@ -1,6 +1,5 @@
 /**
- * 每日金句 — 基于日期种子，每天随机展示一条金句
- * 同一天所有人看到同一条，每 24 小时自动更换
+ * 概念复习卡片 — 每次刷新随机展示一个核心概念
  */
 (function () {
   'use strict';
@@ -8,31 +7,30 @@
   function init() {
     var quoteText = document.getElementById('quote-text');
     var quoteSource = document.getElementById('quote-source');
-    if (!quoteText) return;
+    var quoteLabel = document.querySelector('.daily-quote-label');
+    if (!quoteText || !quoteSource) return;
 
-    fetch('quotes.json')
-      .then(function (resp) { return resp.json(); })
-      .then(function (quotes) {
-        if (!quotes || !quotes.length) {
-          quoteText.textContent = '学而不思则罔，思而不学则殆。';
-          quoteSource.innerHTML = '—— 《论语》';
-          return;
-        }
-        displayDailyQuote(quotes, quoteText, quoteSource);
+    // 更新标签
+    if (quoteLabel) quoteLabel.textContent = '✦ 概念复习';
+
+    fetch('concepts.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var concepts = data.concepts || {};
+        var names = Object.keys(concepts);
+        if (!names.length) return;
+
+        var idx = Math.floor(Math.random() * names.length);
+        var name = names[idx];
+        var desc = concepts[name];
+
+        quoteText.textContent = '「' + name + '」';
+        quoteSource.innerHTML = desc + ' <br><small style="color:#999;">—— 子休 · 前三排概念库（43个概念，刷新随机复习）</small>';
       })
       .catch(function () {
-        quoteText.textContent = '世界上只有一种真正的英雄主义，那就是在认清生活真相之后依然热爱生活。';
-        quoteSource.innerHTML = '—— 罗曼·罗兰';
+        quoteText.textContent = '「实事求是」';
+        quoteSource.innerHTML = '把「我觉得」换成「事实上」。一切分析的前提是把情绪放掉，先看客观事实。';
       });
-  }
-
-  function displayDailyQuote(quotes, textEl, sourceEl) {
-    // 每次刷新随机选一条
-    var index = Math.floor(Math.random() * quotes.length);
-    var quote = quotes[index];
-
-    textEl.textContent = '「' + quote + '」';
-    sourceEl.innerHTML = '—— 前三排 · 学习小组';
   }
 
   if (document.readyState === 'loading') {

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>概念库 — 前三排 · 学习小组</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+    .concept-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      border-left: 3px solid var(--accent);
+      transition: all 0.2s;
+    }
+    .concept-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+    .concept-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      font-family: var(--font-serif);
+    }
+    .concept-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .concept-search {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 25px;
+      font-size: 0.95rem;
+      outline: none;
+      margin-bottom: 1.5rem;
+      font-family: var(--font-sans);
+    }
+    .concept-search:focus { border-color: var(--accent); }
+    .concept-count {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 600px) {
+      .concept-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-title"><span class="accent">前三排</span> · 概念库</div>
+  <div class="site-subtitle">子休辩证唯物主义心理学 — 43个核心分析工具</div>
+</header>
+
+<main class="main-content">
+  <input type="text" id="concept-search" class="concept-search" placeholder="搜索概念…" autocomplete="off">
+  <div class="concept-count" id="concept-count"></div>
+  <div class="concept-grid" id="concept-grid"></div>
+</main>
+
+<footer class="site-footer">
+  <p><a href="index.html">← 返回文章目录</a> | <a href="agent.html">💬 子休问答</a></p>
+</footer>
+
+<script>
+(function () {
+  fetch('concepts.json')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      var concepts = data.concepts || {};
+      var names = Object.keys(concepts);
+      renderGrid(concepts, names);
+
+      document.getElementById('concept-search').addEventListener('input', function () {
+        var q = this.value.trim();
+        if (!q) { renderGrid(concepts, names); return; }
+        var filtered = names.filter(function (n) {
+          return n.indexOf(q) !== -1 || concepts[n].indexOf(q) !== -1;
+        });
+        renderGrid(concepts, filtered);
+      });
+    });
+
+  function renderGrid(concepts, names) {
+    document.getElementById('concept-count').textContent = '共 ' + names.length + ' 个概念';
+    var grid = document.getElementById('concept-grid');
+    grid.innerHTML = '';
+    names.sort(function (a, b) { return a.localeCompare(b, 'zh'); });
+    names.forEach(function (name) {
+      var card = document.createElement('div');
+      card.className = 'concept-card';
+      card.innerHTML = '<div class="concept-name">' + name + '</div><div class="concept-desc">' + concepts[name] + '</div>';
+      grid.appendChild(card);
+    });
+  }
+})();
+</script>
+</body>
+</html>
