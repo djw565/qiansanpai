@@ -39,13 +39,113 @@
         console.warn('articles.json 加载失败，搜索功能不可用');
       });
 
-    // 绑定事件
+    // 绑定搜索框事件
     searchInput.addEventListener('input', onSearchInput);
     searchInput.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         searchInput.value = '';
         clearSearch();
       }
+    });
+
+    // 绑定标签点击事件
+    var filterTags = document.querySelectorAll('.filter-tag');
+    filterTags.forEach(function (tag) {
+      tag.addEventListener('click', function (e) {
+        e.preventDefault();
+        var filter = this.getAttribute('data-filter');
+        onTagClick(filter, this);
+      });
+    });
+  }
+
+  // ============ 标签筛选 ============
+
+  var currentTag = null;
+
+  function onTagClick(filter, tagEl) {
+    // 切换：点同一个标签取消筛选
+    if (currentTag === filter) {
+      currentTag = null;
+      clearSearch();
+      updateTagActive(null);
+      return;
+    }
+
+    currentTag = filter;
+    updateTagActive(tagEl);
+
+    if (!articles.length) return;
+
+    var results;
+    if (filter === 'all') {
+      currentTag = null;
+      clearSearch();
+      updateTagActive(null);
+      return;
+    } else {
+      results = articles.filter(function (a) {
+        return a.tags && a.tags.indexOf(filter) !== -1;
+      });
+    }
+
+    // 清空搜索框（标签和搜索是独立的两套）
+    searchInput.value = '';
+    renderFilterResults(results, filter);
+  }
+
+  function updateTagActive(activeEl) {
+    var allTags = document.querySelectorAll('.filter-tag');
+    allTags.forEach(function (t) { t.classList.remove('active'); });
+    if (activeEl) {
+      activeEl.classList.add('active');
+    } else {
+      // 恢复"全部"为激活
+      var allTag = document.querySelector('.filter-tag[data-filter="all"]');
+      if (allTag) allTag.classList.add('active');
+    }
+  }
+
+  function renderFilterResults(results, filter) {
+    resultCount.style.display = 'block';
+    resultCount.innerHTML = '筛选 <strong>' + filter + '</strong>：找到 <strong>' + results.length + '</strong> 篇';
+
+    allYearSections.forEach(function (s) { s.style.display = 'none'; });
+
+    var oldResults = mainContent.querySelectorAll('.search-results');
+    oldResults.forEach(function (el) { el.remove(); });
+
+    if (results.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'search-no-results search-results';
+      empty.innerHTML = '<p>该标签下暂无文章</p>';
+      mainContent.appendChild(empty);
+      return;
+    }
+
+    var byYear = {};
+    results.forEach(function (a) {
+      var year = a.date ? a.date.slice(0, 4) : '未分类';
+      if (!byYear[year]) byYear[year] = [];
+      byYear[year].push(a);
+    });
+
+    var years = Object.keys(byYear).sort().reverse();
+    years.forEach(function (year) {
+      var section = document.createElement('section');
+      section.className = 'year-section search-results';
+
+      var heading = document.createElement('h2');
+      heading.className = 'year-heading';
+      heading.innerHTML = year + ' 年 <span class="count">(' + byYear[year].length + ' 篇)</span>';
+      section.appendChild(heading);
+
+      byYear[year].forEach(function (a) {
+        var card = createArticleCard(a, '');
+        section.appendChild(card);
+      });
+
+      mainContent.appendChild(section);
     });
   }
 
