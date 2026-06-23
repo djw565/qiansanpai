@@ -352,7 +352,7 @@ def build_index_page(articles: list):
 
 <main class="main-content">
   <div id="daily-quote" class="daily-quote">
-    <div class="daily-quote-label">✦ 每日金句</div>
+    <div class="daily-quote-label">✦ 随机金句</div>
     <div class="daily-quote-text" id="quote-text">加载中...</div>
     <div class="daily-quote-source" id="quote-source"></div>
   </div>
