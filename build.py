@@ -519,7 +519,7 @@ def main():
 
             excerpt = 'PDF 案例文档 — 点击下载或在线查看'
             if pdf_text:
-                excerpt = pdf_text[:150].replace('\n', ' ') + '…'
+                excerpt = pdf_text[:500].replace('\n', ' ') + '…'
 
             # 为 PDF 生成 HTML 在线阅读页
             pdf_slug = 'pdf_' + generate_slug(parsed, pdf_file.name)

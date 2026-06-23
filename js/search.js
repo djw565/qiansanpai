@@ -51,20 +51,32 @@
   // ============ 搜索 ============
   var currentTag = null;
 
+  var fulltextLoading = false;
+
   function onSearchInput() {
     // 首次搜索时懒加载全文索引
     if (!fulltextLoaded) {
       fulltextLoaded = true;
+      fulltextLoading = true;
+      resultCount.style.display = 'block';
+      resultCount.innerHTML = '全文索引加载中…';
       fetch('fulltext.json')
         .then(function (r) { return r.json(); })
         .then(function (data) {
           data.forEach(function (doc) {
             fulltextMap[doc.slug] = doc.fulltext || doc.excerpt || '';
           });
-          // 加载完后立即执行当前搜索
+          fulltextLoading = false;
+          resultCount.style.display = 'none';
+          // 加载完后执行搜索
           doSearch();
         })
-        .catch(function () {});
+        .catch(function () {
+          fulltextLoading = false;
+          resultCount.style.display = 'none';
+          doSearch(); // 降级搜索
+        });
+      return; // 等加载完
     }
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(doSearch, 250);
