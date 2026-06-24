@@ -497,7 +497,13 @@ description: |
 ## 当前对话的知识库参考（今日搜索到的相关文章，请引用其中的观点和案例）
 ${context || '（暂无相关文章匹配）'}
 
-请基于以上方法论和知识库参考回答用户。${firstTurnHint}${modeHint}`;
+请基于以上方法论和知识库参考回答用户。
+
+⚠️ 每次回答末尾必须以分隔线隔开，加上这句话：
+---
+*以上内容由AI以子休风格生成，仅供学习参考，不构成实质建议。具体问题请联系子休本人咨询。*
+
+${firstTurnHint}${modeHint}`;
 
     try {
       const aiResp = await fetch('https://api.deepseek.com/v1/chat/completions', {
