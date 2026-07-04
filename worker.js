@@ -3,6 +3,7 @@ export default {
     if (req.method === 'OPTIONS') return new Response(null, {
       headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' }
     });
+    if (req.method !== 'POST') return new Response('OK');
 
     const { system, question } = await req.json();
 
