@@ -1,5 +1,6 @@
 export default {
   async fetch(req, env) {
+    // CORS 预检 —— 手机端必须！
     if (req.method === 'OPTIONS') return new Response(null, {
       headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' }
     });
