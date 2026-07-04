@@ -257,12 +257,13 @@ ${isConcept ? '用户问概念/方法论。直接解释这个概念，引用经�
     if (intro) intro.style.display = 'none';
   }
 
+  var _thinkingStart = 0;
   function showThinking(query) {
+    _thinkingStart = Date.now();
     var div = document.createElement('div');
     div.className = 'msg msg-agent';
     div.id = 'thinking-msg';
-    var isConcept = /什么是|怎么理解|检索|查找|解释|知识库/.test(query);
-    var msg = isConcept ? '正在搜索概念库…' : '子休正在思考…';
+    var msg = '子休正在思考' + (query.length > 20 ? '…' : '（AI 生成需要几秒，请稍候）…');
     div.innerHTML = '<div class="msg-bubble" style="color:#999;font-size:0.85rem;text-align:center;">' + msg + ' <span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></div>';
     chatArea.appendChild(div);
     chatArea.scrollTop = chatArea.scrollHeight;
