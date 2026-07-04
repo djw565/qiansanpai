@@ -81,18 +81,36 @@
 
     setTimeout(function () {
       if (API_ENDPOINT) {
-        var matched = matchConcepts(query);
-        fetchAIAnswer(query, matched);
+        callAI(query);
       } else {
         var results = searchKnowledgeBase(query);
         var matched = matchConcepts(query);
         removeThinking();
         showZixiuAnswer(query, results, matched);
-        isLoading = false;
-        sendBtn.disabled = false;
-        sendBtn.textContent = '发送';
+        isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
       }
     }, 200);
+  }
+
+  function callAI(query) {
+    fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: query }),
+    })
+      .then(function(r){return r.json();})
+      .then(function(data){
+        removeThinking();
+        if (data.answer) addAgentMsg('<div class="ai-answer">'+data.answer.replace(/\n/g,'<br>')+'</div>');
+        else { var m = matchConcepts(query); showZixiuAnswer(query, [], m); }
+        isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
+        chatArea.scrollTop = chatArea.scrollHeight;
+      })
+      .catch(function(){
+        removeThinking();
+        var m = matchConcepts(query); showZixiuAnswer(query, [], m);
+        isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
+      });
   }
 
   function fetchAIAnswer(query, matched) {
