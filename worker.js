@@ -5,20 +5,29 @@ export default {
     });
     if (req.method !== 'POST') return new Response('OK');
 
-    const { system, question } = await req.json();
+    try {
+      const { system, question } = await req.json();
 
-    const r = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + env.DEEPSEEK_KEY },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [{ role: 'system', content: system }, { role: 'user', content: question || '' }],
-        max_tokens: 500, temperature: 0.7,
-      }),
-    });
-    const d = await r.json();
-    return new Response(JSON.stringify({ answer: d.choices?.[0]?.message?.content || '' }), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+
+      const r = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + env.DEEPSEEK_KEY },
+        body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: system }, { role: 'user', content: question || '' }], max_tokens: 400, temperature: 0.7 }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+      const d = await r.json();
+      return new Response(JSON.stringify({ answer: d.choices?.[0]?.message?.content || '' }), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ answer: '（AI暂时不可用，请稍后重试）' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      });
+    }
   }
 };
