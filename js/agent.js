@@ -64,38 +64,23 @@
   }
 
   function loadKnowledgeBase() {
-    var loaded = 0, target = 2;
-    var startTime = Date.now();
-
-    fetch('fulltext.json')
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        fulltextDB = data;
-        loaded++; checkReady();
-      })
-      .catch(function () {
-        fetch('articles.json')
-          .then(function (r) { return r.json(); })
-          .then(function (data) { fulltextDB = data; loaded++; checkReady(); })
-          .catch(function () { loaded++; checkReady(); });
-      });
-
     fetch('concepts.json')
       .then(function (r) { return r.json(); })
-      .then(function (data) { concepts = data.concepts || {}; loaded++; checkReady(); })
-      .catch(function () { loaded++; checkReady(); });
-
-    function checkReady() {
-      if (loaded >= target) {
+      .then(function (data) {
+        concepts = data.concepts || {};
         isDBReady = true;
-        var elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         if (chatHistory.length === 0) {
-          addSystemMsg('我是子休。知识库已就绪（' + fulltextDB.length + '篇，' + elapsed + '秒）。说说你遇到的事儿？');
+          addSystemMsg('我是子休。概念库已就绪（43个分析工具）。说说你遇到的事儿？');
         } else {
           restoreChat();
         }
-      }
-    }
+      })
+      .catch(function () {
+        isDBReady = true;
+        if (chatHistory.length === 0) {
+          addSystemMsg('我是子休。说说你遇到的事儿？');
+        }
+      });
   }
 
   function handleSend() {
@@ -118,15 +103,16 @@
     questionCount++;
 
     setTimeout(function () {
-      var results = searchKnowledgeBase(query);
       var matchedConcepts = matchConcepts(query);
-      var context = buildContext(results, matchedConcepts);
+      var context = Object.keys(concepts).length > 0
+        ? '可用概念：' + Object.keys(concepts).join('、')
+        : '';
 
       if (API_ENDPOINT) {
-        fetchAIAnswer(query, context, results, matchedConcepts);
+        fetchAIAnswer(query, context, [], matchedConcepts);
       } else {
         removeTyping();
-        showZixiuAnswer(query, results, matchedConcepts);
+        showZixiuAnswer(query, [], matchedConcepts);
         isLoading = false;
         sendBtn.disabled = false;
         sendBtn.textContent = '发送';
