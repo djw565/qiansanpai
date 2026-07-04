@@ -5,7 +5,7 @@
 (function () {
   'use strict';
 
-  var API_ENDPOINT = 'https://rapid-dawn-e859.snfg624dcg.workers.dev';
+  var DS_KEY = 'sk-b868048f1daf48d68bc8d7ec267a32df';
   var fulltextDB = [];
   var concepts = {};
   var chatArea = null;
@@ -192,19 +192,41 @@
     return parts.join('\n\n');
   }
 
-  function fetchAIAnswer(query, context, results, concepts) {
-    fetch(API_ENDPOINT, {
+  function fetchAIAnswer(query, context, results, matchedConcepts) {
+    var isConcept = /检索|查找|搜索|知识库|什么是|是什么意思|怎么理解/.test(query);
+    var modeHint = isConcept
+      ? '\n\n【概念模式】用户问概念/方法论。直接解释，引用知识库。禁止追问。150-300字。'
+      : (questionCount <= 1
+        ? '\n\n【首轮诊断模式】用户第一条消息。只能追问，不能给结论。回复只能有问句。'
+        : '');
+
+    var sysPrompt = '你是子休，前三排社群主理人。用辩证唯物主义分析现实问题。' +
+      '核心信念：人是社会关系的总和、物质决定意识、自欺欺人是默认设置、发展解决大多数问题。' +
+      '风格：先追问后诊断、设问自答、口语化、金句收尾。' +
+      '工具词汇：主要矛盾、自欺欺人、第一责任人、生态位、课题分离、二阶三阶、实事求是、最小行动。' +
+      '知识库参考：' + (context || '无') + modeHint;
+
+    fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: query, context: context, isFirst: questionCount <= 1 }),
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + DS_KEY },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: sysPrompt },
+          { role: 'user', content: query }
+        ],
+        max_tokens: 600,
+        temperature: 0.7,
+      }),
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         removeTyping();
-        if (data.answer) {
-          addAgentMsg('<div class="ai-answer">' + data.answer.replace(/\n/g, '<br>') + '</div>');
+        var answer = (data.choices && data.choices[0] && data.choices[0].message.content) || '';
+        if (answer) {
+          addAgentMsg('<div class="ai-answer">' + answer.replace(/\n/g, '<br>') + '</div>');
         } else {
-          showZixiuAnswer(query, results, concepts);
+          showZixiuAnswer(query, results, matchedConcepts);
         }
         isLoading = false;
         sendBtn.disabled = false;
@@ -213,7 +235,7 @@
       })
       .catch(function () {
         removeTyping();
-        showZixiuAnswer(query, results, concepts);
+        showZixiuAnswer(query, results, matchedConcepts);
         isLoading = false;
         sendBtn.disabled = false;
         sendBtn.textContent = '发送';
