@@ -152,7 +152,7 @@ ${isConcept ? '用户问概念/方法论。直接解释这个概念，引用经�
     fetch(API_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system: sys, question: query }),
+      body: JSON.stringify({ question: query }),
     })
       .then(function(r){return r.json();})
       .then(function(data){
