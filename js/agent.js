@@ -4,7 +4,7 @@
 (function () {
   'use strict';
 
-  var API_ENDPOINT = '';
+  var API_ENDPOINT = 'https://shy-surf-d0aa.snfg624dcg.workers.dev';
   var fulltextDB = [];
   var concepts = {};
   var chatArea = null;
@@ -117,24 +117,26 @@ ${isConcept ? '【概念题】直接解释，引用案例。' : '【事件题】
 ## 表达
 口语化不拽词。设问自答。破题。反直觉反转。金句收尾。极端假设。回答200-400字。${conceptCtx}`;
 
-    fetch(API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system: sys, question: query }),
-    })
-      .then(function(r){return r.json();})
-      .then(function(data){
-        removeThinking();
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', API_ENDPOINT, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.timeout = 15000;
+    xhr.onload = function() {
+      removeThinking();
+      try {
+        var data = JSON.parse(xhr.responseText);
         if (data.answer) addAgentMsg('<div class="ai-answer">'+data.answer.replace(/\n/g,'<br>')+'</div>');
         else { var m = matchConcepts(query); showZixiuAnswer(query, [], m); }
-        isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
-        chatArea.scrollTop = chatArea.scrollHeight;
-      })
-      .catch(function(){
-        removeThinking();
-        var m = matchConcepts(query); showZixiuAnswer(query, [], m);
-        isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
-      });
+      } catch(e) { var m = matchConcepts(query); showZixiuAnswer(query, [], m); }
+      isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
+      chatArea.scrollTop = chatArea.scrollHeight;
+    };
+    xhr.onerror = xhr.ontimeout = function() {
+      removeThinking();
+      var m = matchConcepts(query); showZixiuAnswer(query, [], m);
+      isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
+    };
+    xhr.send(JSON.stringify({ system: sys, question: query }));
   }
 
   function fetchAIAnswer(query, matched) {
