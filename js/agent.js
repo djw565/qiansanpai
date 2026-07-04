@@ -76,7 +76,7 @@
     sendBtn.textContent = '…';
 
     addUserMsg(query);
-    showTyping();
+    showThinking(query);
     questionCount++;
 
     setTimeout(function () {
@@ -111,14 +111,14 @@
     })
       .then(function(r){return r.json();})
       .then(function(data){
-        removeTyping();
+        removeThinking();
         if (data.answer) addAgentMsg('<div class="ai-answer">'+data.answer.replace(/\n/g,'<br>')+'</div>');
-        else showZixiuAnswer(query, [], matched);
+        else { showZixiuAnswer(query, [], matched); }
         isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
         chatArea.scrollTop = chatArea.scrollHeight;
       })
       .catch(function(){
-        removeTyping();
+        removeThinking();
         showZixiuAnswer(query, [], matched);
         isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
       });
@@ -212,16 +212,21 @@
     if (intro) intro.style.display = 'none';
   }
 
-  function showTyping() {
+  function showThinking(query) {
     var div = document.createElement('div');
     div.className = 'msg msg-agent';
-    div.id = 'typing-msg';
-    div.innerHTML = '<div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+    div.id = 'thinking-msg';
+    var isConcept = /什么是|怎么理解|检索|查找|解释|知识库/.test(query);
+    var msg = isConcept ? '正在搜索概念库…' : '子休正在思考…';
+    div.innerHTML = '<div class="msg-bubble" style="color:#999;font-size:0.85rem;text-align:center;">' + msg + ' <span class="thinking-dots"><span>.</span><span>.</span><span>.</span></span></div>';
     chatArea.appendChild(div);
     chatArea.scrollTop = chatArea.scrollHeight;
   }
 
-  function removeTyping() { var el = document.getElementById('typing-msg'); if (el) el.remove(); }
+  function removeThinking() { var el = document.getElementById('thinking-msg'); if (el) el.remove(); }
+
+  function showTyping() { showThinking(''); }
+  function removeTyping() { removeThinking(); }
 
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
 })();
