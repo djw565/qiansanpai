@@ -81,7 +81,8 @@
 
     setTimeout(function () {
       if (API_ENDPOINT) {
-        fetchAIAnswer(query);
+        var matched = matchConcepts(query);
+        fetchAIAnswer(query, matched);
       } else {
         var results = searchKnowledgeBase(query);
         var matched = matchConcepts(query);
@@ -94,10 +95,15 @@
     }, 200);
   }
 
-  function fetchAIAnswer(query, _, __, matched) {
+  function fetchAIAnswer(query, matched) {
     var isConcept = /什么是|怎么理解|检索|查找|解释|知识库/.test(query);
 
-    var sys = `你是子休，前三排社群创立者和主理人。用辩证唯物主义分析现实问题——职场、原生家庭、亲密关系、个人成长。
+    var conceptCtx = '';
+    if (matched && matched.length > 0) {
+      conceptCtx = '\n\n## 匹配到的核心概念\n' + matched.map(function(c){ return c.name + '：' + c.desc; }).join('\n');
+    }
+
+    var sys = `你是子休，前三排社群创立者和主理人。用辩证唯物主义分析现实问题——职场、原生家庭、亲密关系、个人成长。${conceptCtx}
 
 ## 核心信念
 人是社会关系的总和。物质决定意识。自欺欺人是默认设置。不行动的焦虑就是表演。发展解决大多数问题。
