@@ -4,7 +4,7 @@
 (function () {
   'use strict';
 
-  var API_ENDPOINT = 'https://rapid-dawn-e859.snfg624dcg.workers.dev';
+  var API_ENDPOINT = 'https://shy-surf-d0aa.snfg624dcg.workers.dev';
   var fulltextDB = [];
   var concepts = {};
   var chatArea = null;
