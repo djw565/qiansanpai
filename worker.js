@@ -13,7 +13,7 @@ export default {
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [{ role: 'system', content: system }, { role: 'user', content: question }],
-        max_tokens: 600, temperature: 0.7,
+        max_tokens: 400, temperature: 0.7,
       }),
     });
     const d = await r.json();

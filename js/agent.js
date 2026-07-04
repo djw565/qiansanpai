@@ -181,15 +181,14 @@
 
   function buildContext(results, concepts) {
     var parts = [];
-    if (concepts.length) { parts.push('【匹配概念】'); concepts.forEach(function (c) { parts.push(c.name + '：' + c.desc); }); }
+    if (concepts.length) { parts.push('概念：' + concepts.map(function(c){return c.name;}).join('、')); }
     if (results.length) {
-      parts.push('【相关案例摘要】');
-      results.slice(0, 3).forEach(function (r) {
-        var text = r.doc.fulltext || r.doc.excerpt || '';
-        parts.push('《' + r.doc.title + '》' + (text ? '：' + text.slice(0, 300) : ''));
+      parts.push('文章：');
+      results.slice(0, 2).forEach(function (r) {
+        parts.push('《' + r.doc.title + '》');
       });
     }
-    return parts.join('\n\n');
+    return parts.join(' | ').slice(0, 300); // 硬限制 300 字
   }
 
   function fetchAIAnswer(query, context, results, matchedConcepts) {
