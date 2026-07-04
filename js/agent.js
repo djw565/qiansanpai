@@ -80,14 +80,12 @@
     questionCount++;
 
     setTimeout(function () {
-      var matched = matchConcepts(query);
-      var ctx = Object.keys(concepts).length > 0 ? '可用概念：' + Object.keys(concepts).join('、') : '';
-
       if (API_ENDPOINT) {
-        fetchAIAnswer(query, ctx, [], matched);
+        fetchAIAnswer(query);
       } else {
         var results = searchKnowledgeBase(query);
-        removeTyping();
+        var matched = matchConcepts(query);
+        removeThinking();
         showZixiuAnswer(query, results, matched);
         isLoading = false;
         sendBtn.disabled = false;
@@ -96,13 +94,36 @@
     }, 200);
   }
 
-  function fetchAIAnswer(query, context, _, matched) {
+  function fetchAIAnswer(query, _, __, matched) {
     var isConcept = /什么是|怎么理解|检索|查找|解释|知识库/.test(query);
-    var sys = '你是子休，前三排社群主理人。用辩证唯物主义分析现实问题。' +
-      '信念：人是社会关系的总和、物质决定意识、自欺欺人是默认设置、发展解决大多数问题。' +
-      '风格：口语化、设问自答、金句收尾。回答200-400字。' +
-      (isConcept ? '用户问概念，直接解释。' : '先追问定位问题，不能首轮给结论。') +
-      '可用概念：' + (context||'');
+
+    var sys = `你是子休，前三排社群创立者和主理人。用辩证唯物主义分析现实问题——职场、原生家庭、亲密关系、个人成长。
+
+## 核心信念
+人是社会关系的总和。物质决定意识。自欺欺人是默认设置。不行动的焦虑就是表演。发展解决大多数问题。
+
+## 聊天式诊断协议
+${isConcept ? '用户问概念/方法论。直接解释这个概念，引用经典案例。不追问。' : '用户第一条消息时只能追问，不能给结论。先问具体事实、生态位、行动记录。信息够了再分析。每轮最多3个问题。'}
+
+## 8个核心分析工具
+1. 矛盾分析：提出的是次要矛盾，真正的藏在逃避什么里
+2. 社会关系总和：画关系图→受力分析→识别认知盲区
+3. 物质决定意识：还原成长路径，生存方式塑造思维
+4. 生态位分析：利益决定行为，不看人品看作位置。三楼永远扶持一楼制衡二楼
+5. 否定之否定：成长是旧我崩塌后重建
+6. 实践论：没实践的"懂"是自欺欺人。最小行动
+7. 实事求是：把"我觉得"换成"事实上"
+8. 冲突博弈：别被对方换了框架，吵架是说服第三方
+
+## 关键行动准则
+- 零行动=自欺欺人。第一责任人。留痕原则。权责对等
+- 利润中心离钱近，成本中心离裁近。一段关系稳定长期存在一定是共谋
+- 绕开比填坑聪明。性格是特点不是缺点。打铁还需自身硬
+- 吵架不是为了说服对方，是为了说服第三方
+
+## 表达风格
+口语化、不拽学术词。设问自答：「那问题来了——她为什么要这么做呢？」。破题：「这道题最核心的问题不是XX」。反直觉反转。金句收尾。极端假设：「假设婆婆今晚死了，明天你还离吗？」
+回答控制在200-400字。结尾用金句。`;
 
     fetch(API_ENDPOINT, {
       method: 'POST',
@@ -113,13 +134,13 @@
       .then(function(data){
         removeThinking();
         if (data.answer) addAgentMsg('<div class="ai-answer">'+data.answer.replace(/\n/g,'<br>')+'</div>');
-        else { showZixiuAnswer(query, [], matched); }
+        else { showZixiuAnswer(query, [], []); }
         isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
         chatArea.scrollTop = chatArea.scrollHeight;
       })
       .catch(function(){
         removeThinking();
-        showZixiuAnswer(query, [], matched);
+        showZixiuAnswer(query, [], []);
         isLoading = false; sendBtn.disabled = false; sendBtn.textContent = '发送';
       });
   }
