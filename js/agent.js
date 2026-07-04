@@ -4,7 +4,7 @@
 (function () {
   'use strict';
 
-  var API_ENDPOINT = 'https://shy-surf-d0aa.snfg624dcg.workers.dev';
+  var DS_KEY = 'sk-b868048f1daf48d68bc8d7ec267a32df';
   var fulltextDB = [];
   var concepts = {};
   var chatArea = null;
@@ -117,10 +117,10 @@ ${isConcept ? '【概念题】直接解释，引用案例。' : '【事件题】
 ## 表达
 口语化不拽词。设问自答。破题。反直觉反转。金句收尾。极端假设。回答200-400字。${conceptCtx}`;
 
-    fetch(API_ENDPOINT, {
+    fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system: sys, question: query }),
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + DS_KEY },
+      body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: sys }, { role: 'user', content: query }], max_tokens: 500, temperature: 0.7 }),
     })
       .then(function(r){return r.json();})
       .then(function(data){
