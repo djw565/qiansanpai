@@ -66,7 +66,7 @@ HTML_INDEX_HEAD = '''<!DOCTYPE html>
   <script src="js/auth.js"></script>
 <header class="site-header">
   <div class="site-title"><span class="accent">前三排</span> · 概念库</div>
-  <div class="site-subtitle">子休辩证唯物主义心理学 — 43个核心分析工具 · 按MOC四大领域分类</div>
+  <div class="site-subtitle">子休辩证唯物主义心理学 — 47个核心分析工具 · 按MOC四大领域分类</div>
 </header>
 <main style="padding:2rem 1rem 4rem;max-width:960px;margin:0 auto;">'''
 
@@ -222,6 +222,11 @@ def parse_moc():
     current_domain = None
 
     for line in text.split('\n'):
+        # 遇到二级标题（## 实体/来源/综合分析）时，停止当前领域收集
+        if re.match(r'^##\s+', line):
+            current_domain = None
+            continue
+
         # 匹配领域标题: ### 🌱 个人成长（15）
         m = re.match(r'###\s+.+\s+(.+)\s*[（(]\d+[）)]', line)
         if m and '静态目录' not in line:
@@ -274,7 +279,7 @@ def build_index(concepts_data: list):
     slug_map = {c['title']: c['slug'] for c in concepts_data}
 
     page = HTML_INDEX_HEAD
-    page += '<div class="concepts-hero"><h1>43 个核心概念</h1><p>按四大领域分类 · 点击卡片查看完整定义与案例分析</p>'
+    page += '<div class="concepts-hero"><h1>47 个核心概念</h1><p>按四大领域分类 · 点击卡片查看完整定义与案例分析</p>'
     page += '<input type="text" id="concept-search" class="concept-search" placeholder="搜索概念…" autocomplete="off"></div>'
 
     total = 0
