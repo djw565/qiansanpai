@@ -1,16 +1,16 @@
 /**
  * 密码门 — 访问控制
- * 改密码：修改下面 PASSWORD 的值，重新部署即可
+ * 改密码：见下方 HASH 处的注释（算出新密码哈希替换 HASH），重新部署即可
  */
 (function () {
   'use strict';
 
-  // ====== 在这里改密码！======
-  var PASSWORD = 'qiansanpai2026';
+  // ====== 改密码在这里 ======
+  // 只存哈希，不存明文（F12 看不到密码本身）。
+  // 改密码：用下面命令算出新密码的哈希，替换 HASH 的值后重新部署：
+  //   node -e "function s(x){var h=0;for(var i=0;i<x.length;i++){h=((h<<5)-h+x.charCodeAt(i))|0;}return 'h'+Math.abs(h).toString(36);} console.log(s('新密码'))"
+  var HASH = 'hf97i2p';
   // =========================
-
-  // 密码的简单哈希（防止明文直接暴露，但 F12 可破解——防君子不防小人）
-  var HASH = simpleHash(PASSWORD);
 
   var SESSION_KEY = '_qsp_auth';
   var AUTH_DURATION = 24 * 60 * 60 * 1000; // 24小时
