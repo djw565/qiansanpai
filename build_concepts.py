@@ -234,7 +234,8 @@ def parse_moc():
             pass
         m = re.match(r'###\s+\S+\s+(.+)', line)
         if m and current_domain is None:
-            current_domain = m.group(1).strip()
+            # 去掉 MOC 标题里手写的「（16）」之类计数，避免与真实计数重复显示
+            current_domain = re.sub(r'\s*[（(]\d+[）)]\s*$', '', m.group(1)).strip()
             domains[current_domain] = []
             continue
 
@@ -247,7 +248,7 @@ def parse_moc():
         # 新领域
         m = re.match(r'###\s+\S+\s+(.+)', line)
         if m and 'MOC' not in line and 'Dataview' not in line and '静态目录' not in line:
-            current_domain = m.group(1).strip()
+            current_domain = re.sub(r'\s*[（(]\d+[）)]\s*$', '', m.group(1)).strip()
             if current_domain not in domains:
                 domains[current_domain] = []
 
