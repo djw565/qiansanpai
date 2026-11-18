@@ -279,8 +279,10 @@ def build_index(concepts_data: list):
     # 建立 title → slug 映射
     slug_map = {c['title']: c['slug'] for c in concepts_data}
 
-    page = HTML_INDEX_HEAD
-    page += '<div class="concepts-hero"><h1>47 个核心概念</h1><p>按四大领域分类 · 点击卡片查看完整定义与案例分析</p>'
+    # 概念总数动态生成，避免新增概念后标题数字过期
+    n_all = len(concepts_data)
+    page = HTML_INDEX_HEAD.replace('47个核心概念', f'{n_all}个核心概念').replace('47个核心分析工具', f'{n_all}个核心分析工具')
+    page += f'<div class="concepts-hero"><h1>{n_all} 个核心概念</h1><p>按四大领域分类 · 点击卡片查看完整定义与案例分析</p>'
     page += '<input type="text" id="concept-search" class="concept-search" placeholder="搜索概念…" autocomplete="off"></div>'
 
     total = 0
