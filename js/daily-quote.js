@@ -25,7 +25,7 @@
         var desc = concepts[name];
 
         quoteText.textContent = '「' + name + '」';
-        quoteSource.innerHTML = desc + ' <br><small style="color:#999;">—— 子休 · 前三排概念库（43个概念，刷新随机复习）</small>';
+        quoteSource.innerHTML = desc + ' <br><small style="color:#999;">—— 子休 · 前三排概念库（' + names.length + '个概念，刷新随机复习）</small>';
       })
       .catch(function () {
         quoteText.textContent = '「实事求是」';
